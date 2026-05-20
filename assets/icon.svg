@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="BoardBridge icon">
+  <rect width="512" height="512" fill="#20514b"/>
+  <path d="M112 118h128c36 0 64 25 64 58 0 18-9 34-24 45 22 10 36 29 36 53 0 36-30 62-70 62H112V118zm70 85h45c16 0 27-9 27-23s-11-22-27-22h-45v45zm0 93h53c18 0 30-10 30-25 0-16-12-26-30-26h-53v51z" fill="#ffffff"/>
+  <path d="M310 118h63c55 0 91 33 91 83 0 51-36 84-91 84h-17v51h-46V118zm62 126c28 0 45-16 45-43 0-26-17-42-45-42h-16v85h16z" fill="#f5d6a4"/>
+  <path d="M96 386h320v28H96z" fill="#f5d6a4"/>
+</svg>

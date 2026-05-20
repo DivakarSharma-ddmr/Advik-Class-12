@@ -1,0 +1,16 @@
+{
+  "name": "BoardBridge CBSE Class XII",
+  "short_name": "BoardBridge",
+  "description": "A CBSE Class XII study app for syllabus, concepts, quizzes, papers, and a bounded assistant.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fbfcfa",
+  "theme_color": "#20514b",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

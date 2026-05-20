@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#20514b" />
+    <title>BoardBridge - CBSE Class XII Study App</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css?v=3" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="rail" aria-label="Subject navigation">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">BB</span>
+          <div>
+            <h1>BoardBridge</h1>
+            <p>Class XII 2026-27</p>
+          </div>
+        </div>
+        <div class="search-box">
+          <label for="global-search">Search syllabus</label>
+          <input id="global-search" type="search" placeholder="Try: ADR, GDP, attitude" />
+        </div>
+        <nav id="subject-list" class="subject-list"></nav>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">CBSE board prep cockpit</p>
+            <h2 id="page-title">Syllabus, concepts, quiz, test papers</h2>
+          </div>
+          <div class="top-actions">
+            <button class="icon-button" id="open-settings" title="Settings / API key" aria-label="Open settings">⚙</button>
+            <button class="icon-button" id="install-app" title="Install app" aria-label="Install app" hidden>+</button>
+            <button class="icon-button" id="print-current" title="Print / download PDF" aria-label="Print paper">⊞</button>
+            <button class="icon-button" id="mobile-nav-toggle" title="Toggle subjects" aria-label="Toggle subject list" aria-expanded="false">☰</button>
+          </div>
+        </header>
+
+        <section class="overview-band" aria-label="Study overview">
+          <div class="metric">
+            <span id="metric-subjects">6</span>
+            <p>Subjects</p>
+          </div>
+          <div class="metric">
+            <span id="metric-chapters">0</span>
+            <p>Syllabus units</p>
+          </div>
+          <div class="metric">
+            <span id="metric-sources">0</span>
+            <p>Official sources</p>
+          </div>
+          <div class="source-note">
+            <strong>Source boundary</strong>
+            <p>This app uses official CBSE syllabus, sample-paper, and previous-paper references. It does not copy full textbook chapters.</p>
+          </div>
+        </section>
+
+        <section class="tabs" aria-label="Main tools">
+          <button class="tab is-active" data-tab="study">Study</button>
+          <button class="tab" data-tab="quiz">Pop Quiz</button>
+          <button class="tab" data-tab="paper">Test Paper</button>
+          <button class="tab" data-tab="assistant">Assistant</button>
+          <button class="tab" data-tab="sources">Sources</button>
+        </section>
+
+        <section id="study" class="tool-panel is-active"></section>
+        <section id="quiz" class="tool-panel"></section>
+        <section id="paper" class="tool-panel"></section>
+        <section id="assistant" class="tool-panel"></section>
+        <section id="sources" class="tool-panel"></section>
+      </main>
+    </div>
+
+    <template id="empty-state-template">
+      <div class="empty-state">
+        <h3>No match yet</h3>
+        <p>Choose a subject or search for a topic from the official syllabus.</p>
+      </div>
+    </template>
+
+    <div id="settings-overlay" class="settings-overlay" hidden>
+      <div class="settings-panel" role="dialog" aria-label="App settings">
+        <div class="settings-header">
+          <h2>Settings</h2>
+          <button class="icon-button" id="close-settings" aria-label="Close settings">✕</button>
+        </div>
+        <div class="settings-body">
+          <div class="field">
+            <label for="api-key-input">Anthropic API Key (for live AI answers)</label>
+            <input id="api-key-input" type="password" placeholder="sk-ant-..." autocomplete="off" />
+            <p class="small-note" style="margin-top:6px">Stored only in your browser. Get a key at console.anthropic.com. Without a key the app still works with built-in syllabus logic.</p>
+          </div>
+          <div class="button-row">
+            <button class="primary-button" id="save-api-key">Save key</button>
+            <button class="secondary-button" id="clear-api-key">Clear key</button>
+          </div>
+          <div id="key-status" class="key-status"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="data.js?v=3"></script>
+    <script src="app.js?v=3"></script>
+  </body>
+</html>
