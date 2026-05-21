@@ -1,10 +1,10 @@
-const CACHE_NAME = "boardbridge-v3";
+const CACHE_NAME = "boardbridge-v4";
 const APP_FILES = [
   "./",
   "./index.html",
-  "./styles.css?v=3",
-  "./data.js?v=3",
-  "./app.js?v=3",
+  "./styles.css?v=4",
+  "./data.js?v=4",
+  "./app.js?v=4",
   "./manifest.webmanifest",
   "./assets/icon.svg"
 ];
