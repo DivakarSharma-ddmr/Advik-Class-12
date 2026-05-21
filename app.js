@@ -18,7 +18,7 @@ const EXAM_DATE      = new Date("2027-02-15T06:00:00");   // approx board exam s
  * When set, no API key is needed in any browser — the Worker holds the key.
  * Leave as "" to fall back to the manual localStorage API key.
  */
-const WORKER_URL = "";
+const WORKER_URL = "https://boardbridge-proxy.divakar-sharma.workers.dev";
 
 const CLAUDE_SYSTEM = `You are a dedicated CBSE Class XII study assistant for a student in New Delhi preparing for board exams in Feb–Mar 2027.
 

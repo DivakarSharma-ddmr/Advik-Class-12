@@ -1,0 +1,3 @@
+name = "boardbridge-proxy"
+main = "worker.js"
+compatibility_date = "2025-05-21"
