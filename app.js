@@ -1,1340 +1,938 @@
-const DATA = window.CBSE_STUDY_DATA;
-const CLAUDE_MODEL = "claude-haiku-4-5-20251001";
-const CLAUDE_ENDPOINT = "https://api.anthropic.com/v1/messages";
+/* ============================================================
+   BoardBridge — app.js  (v4 — complete rewrite)
+   CBSE Class XII · 2026-27 · DivakarSharma-ddmr
+   ============================================================ */
 
-const CLAUDE_SYSTEM = `You are a study assistant for a CBSE Class XII student in New Delhi, India, preparing for board exams in Feb-Mar 2027.
-You ONLY answer questions about these six subjects and their prescribed textbooks:
-- Legal Studies (code 074) - CBSE Legal Studies Class XII textbook
-- Psychology (code 037) - NCERT Psychology Class XII
-- Economics (code 030) - NCERT Introductory Macroeconomics + Indian Economic Development
-- Political Science (code 028) - NCERT Contemporary World Politics + Politics in India Since Independence
-- English Core (code 301) - NCERT Flamingo + Vistas + Reading and Writing Skills
-- Applied Art - Commercial Art (code 052) - CBSE Fine Arts syllabus, History of Indian Art
+'use strict';
 
-If asked about anything outside this scope, respond with: "I can only help with CBSE Class XII subjects for the 2026-27 curriculum."
+/* ── Constants ──────────────────────────────────────────── */
+const DATA           = window.CBSE_STUDY_DATA;
+const CLAUDE_MODEL   = "claude-haiku-4-5-20251001";
+const CLAUDE_ENDPOINT= "https://api.anthropic.com/v1/messages";
+const EXAM_DATE      = new Date("2027-02-15T06:00:00");   // approx board exam start
+
+const CLAUDE_SYSTEM = `You are a dedicated CBSE Class XII study assistant for a student in New Delhi preparing for board exams in Feb–Mar 2027.
+
+You ONLY help with these six subjects and their prescribed books:
+• Legal Studies (074) — CBSE Legal Studies XII
+• Psychology (037) — NCERT Psychology XII
+• Economics (030) — NCERT Introductory Macroeconomics + Indian Economic Development
+• Political Science (028) — NCERT Contemporary World Politics + Politics in India Since Independence
+• English Core (301) — NCERT Flamingo, Vistas + Reading/Writing Skills
+• Applied Art – Commercial Art (052) — CBSE Fine Arts / History of Indian Art
+
+If asked about anything outside this scope, say: "I can only help with CBSE Class XII subjects for the 2026-27 curriculum."
 
 For every answer:
-1. Give a clear definition or explanation anchored to the syllabus
-2. Mention how CBSE typically frames this in board exams (question type, marks)
-3. Give the expected answer structure: define → explain → example → conclusion
-4. Use precise syllabus terminology
-Keep answers under 300 words unless more is genuinely needed for a long-answer topic.`;
+1. Open with a clear, precise definition anchored to the NCERT/CBSE syllabus.
+2. Elaborate with explanation, mechanism, or significance — 3-5 bullet points or short paragraphs.
+3. Give a concrete real-world or textbook example.
+4. End with the board-exam angle: how CBSE frames this topic (marks, typical question type, what the marking scheme rewards).
+Use precise syllabus terminology. Keep answers thorough but focused — quality over length.`;
 
-const els = {
-  subjectList: document.querySelector("#subject-list"),
-  globalSearch: document.querySelector("#global-search"),
-  pageTitle: document.querySelector("#page-title"),
-  metrics: {
-    subjects: document.querySelector("#metric-subjects"),
-    chapters: document.querySelector("#metric-chapters"),
-    sources: document.querySelector("#metric-sources")
-  },
-  panels: {
-    study: document.querySelector("#study"),
-    quiz: document.querySelector("#quiz"),
-    paper: document.querySelector("#paper"),
-    assistant: document.querySelector("#assistant"),
-    sources: document.querySelector("#sources")
-  },
-  installButton: document.querySelector("#install-app"),
-  printButton: document.querySelector("#print-current"),
-  settingsOverlay: document.querySelector("#settings-overlay"),
-  openSettings: document.querySelector("#open-settings"),
-  closeSettings: document.querySelector("#close-settings"),
-  apiKeyInput: document.querySelector("#api-key-input"),
-  saveApiKey: document.querySelector("#save-api-key"),
-  clearApiKey: document.querySelector("#clear-api-key"),
-  keyStatus: document.querySelector("#key-status"),
-  mobileNavToggle: document.querySelector("#mobile-nav-toggle"),
-  rail: document.querySelector(".rail")
-};
-
+/* ── State ─────────────────────────────────────────────── */
 const state = {
-  selectedSubjectId: DATA.subjects[0].id,
-  selectedChapterId: null,
-  activeTab: "study",
-  query: "",
-  quiz: [],
-  paper: null,
-  sourceCache: new Map(),
-  deferredInstall: null
+  subjectId   : DATA.subjects[0].id,
+  chapterId   : null,
+  tab         : "study",       // "study" | "quiz" | "test"
+  quiz        : [],            // current quiz items
+  paper       : null,          // generated test paper
+  search      : "",
+  chat        : [],            // [{role, text}]
+  deferredInstall: null,
+  sourceCache : new Map()
 };
 
-const marksLabels = {
-  1: "1 marker",
-  2: "2 marker",
-  3: "3 marker",
-  4: "4 marker",
-  5: "5 marker",
-  6: "6 marker"
-};
+/* ── Helpers ────────────────────────────────────────────── */
+function getApiKey()  { return localStorage.getItem("boardbridge_api_key") || ""; }
+function hasApiKey()  { return Boolean(getApiKey()); }
 
-const targetByDuration = {
-  60: 30,
-  120: 55,
-  180: 80
-};
+function allChapters() {
+  return DATA.subjects.flatMap(s => s.books.flatMap(b => b.chapters).map(c => ({...c, _subject: s})));
+}
+function getSubject(id) { return DATA.subjects.find(s => s.id === id); }
+function getChapter(subj, chId) {
+  return subj?.books.flatMap(b => b.chapters).find(c => c.id === chId);
+}
+function currentSubject() { return getSubject(state.subjectId); }
+function currentChapter() { return getChapter(currentSubject(), state.chapterId); }
 
-const SOURCE_CONFIG = {
-  readerBase: "https://r.jina.ai/",
-  searchBase: "https://s.jina.ai/",
-  proxyUrl: window.BOARDBRIDGE_SOURCE_PROXY || "",
-  publicSearch: Boolean(window.BOARDBRIDGE_ENABLE_PUBLIC_SEARCH)
-};
+function daysUntilExam() {
+  const diff = EXAM_DATE - new Date();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+}
 
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function nl2p(str) {
+  return str.split(/\n\n+/).map(p => `<p>${escHtml(p).replace(/\n/g,"<br>")}</p>`).join("");
+}
+
+/* ── Claude API ─────────────────────────────────────────── */
+async function callClaude(userMessage, context = "") {
+  const key = getApiKey();
+  if (!key) throw new Error("NO_KEY");
+  const messages = context
+    ? [{ role: "user", content: `Context:\n${context}\n\nQuestion: ${userMessage}` }]
+    : [{ role: "user", content: userMessage }];
+
+  const res = await fetch(CLAUDE_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "content-type"                          : "application/json",
+      "x-api-key"                             : key,
+      "anthropic-version"                     : "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: 1024, system: CLAUDE_SYSTEM, messages })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `API error ${res.status}`);
+  }
+  const data = await res.json();
+  return data.content?.[0]?.text || "(No response)";
+}
+
+/* ── Web source fetching (Jina.ai) ─────────────────────── */
+async function fetchSourceBundle(query) {
+  if (state.sourceCache.has(query)) return state.sourceCache.get(query);
+  const urls = buildSourceUrls(query);
+  const fetches = urls.slice(0, 3).map(u =>
+    fetch(`https://r.jina.ai/${u}`)
+      .then(r => r.ok ? r.text() : "")
+      .catch(() => "")
+  );
+  const results  = await Promise.all(fetches);
+  const combined = results.map((t, i) => t ? `[Source ${i+1}: ${urls[i]}]\n${t.slice(0, 1200)}` : "").filter(Boolean).join("\n\n");
+  state.sourceCache.set(query, combined);
+  return combined;
+}
+
+function buildSourceUrls(query) {
+  const q = encodeURIComponent(query + " CBSE Class 12 NCERT");
+  return [
+    `https://ncert.nic.in/textbook.php`,
+    `https://cbseacademic.nic.in/curriculum_2027.html`,
+    `https://www.google.com/search?q=${q}`
+  ];
+}
+
+/* ================================================================
+   RENDER ENGINE
+   ================================================================ */
+
+/* ── Sidebar ────────────────────────────────────────────── */
+function renderSidebar() {
+  const nav = document.getElementById("subject-nav");
+  if (!nav) return;
+  nav.innerHTML = DATA.subjects.map(s => `
+    <button class="nav-subject ${s.id === state.subjectId ? "active" : ""}"
+            data-subject="${s.id}"
+            style="--sc:${s.color};--scs:${s.colorSoft}">
+      <span class="nav-icon">${s.icon}</span>
+      <span class="nav-label">${s.name}</span>
+    </button>`).join("");
+
+  nav.querySelectorAll(".nav-subject").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.subjectId = btn.dataset.subject;
+      state.chapterId = null;
+      state.tab = "study";
+      state.paper = null;
+      state.quiz  = [];
+      renderSidebar();
+      renderPage();
+      closeSidebar();
+    });
+  });
+}
+
+/* ── Countdown ──────────────────────────────────────────── */
+function renderCountdown() {
+  const el = document.getElementById("exam-countdown");
+  if (!el) return;
+  const d = daysUntilExam();
+  el.textContent = d > 0 ? `${d} days to boards` : "Board exams ongoing!";
+}
+
+/* ── Page router ────────────────────────────────────────── */
+function renderPage() {
+  const pc = document.getElementById("page-content");
+  if (!pc) return;
+  if (state.search.length >= 2) {
+    pc.innerHTML = renderSearch();
+    attachSearchEvents();
+    return;
+  }
+  if (!state.chapterId) {
+    pc.innerHTML = renderSubjectHome();
+    attachSubjectHomeEvents();
+    return;
+  }
+  pc.innerHTML = renderChapterView();
+  attachChapterEvents();
+}
+
+/* ── Subject home (chapter cards) ──────────────────────── */
+function renderSubjectHome() {
+  const s = currentSubject();
+  const totalChapters = s.books.flatMap(b => b.chapters).length;
+  return `
+  <div class="subject-hero" style="--sc:${s.color};--scs:${s.colorSoft}">
+    <div class="hero-icon">${s.icon}</div>
+    <div class="hero-body">
+      <div class="hero-code">Code ${s.code} · Theory ${s.theoryMarks}M + Practical ${s.practicalMarks}M</div>
+      <h1 class="hero-title">${s.name}</h1>
+      <p class="hero-sub">${totalChapters} chapters · Exam: Feb–Mar 2027</p>
+    </div>
+  </div>
+
+  <div class="chapter-grid">
+    ${s.books.flatMap(b => b.chapters).map(ch => `
+      <button class="chapter-card" data-chapter="${ch.id}" style="--sc:${s.color}">
+        <div class="chapter-card-unit">${ch.unit || ""}</div>
+        <div class="chapter-card-title">${ch.title}</div>
+        <div class="chapter-card-hook">${ch.hook || ""}</div>
+        <div class="chapter-card-meta">
+          <span>${ch.topics?.length || 0} topics</span>
+          <span>${ch.pastYearQs?.length || 0} board Qs</span>
+          <span>${ch.marks || "—"}M</span>
+        </div>
+      </button>`).join("")}
+  </div>`;
+}
+
+function attachSubjectHomeEvents() {
+  document.querySelectorAll(".chapter-card").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.chapterId = btn.dataset.chapter;
+      state.tab = "study";
+      state.quiz  = [];
+      state.paper = null;
+      renderPage();
+    });
+  });
+}
+
+/* ── Chapter view ───────────────────────────────────────── */
+function renderChapterView() {
+  const s = currentSubject();
+  const ch = currentChapter();
+  if (!ch) return `<p class="empty-state">Chapter not found.</p>`;
+  return `
+  <div class="chapter-hero" style="--sc:${s.color}">
+    <button class="back-btn" id="back-to-subject">← ${s.name}</button>
+    <div class="chapter-hero-body">
+      <div class="chapter-unit-badge">${ch.unit || ""}</div>
+      <h2 class="chapter-hero-title">${ch.title}</h2>
+      <p class="chapter-hero-hook">${ch.hook || ""}</p>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn ${state.tab==="study"?"active":""}" data-tab="study">📖 Study</button>
+    <button class="tab-btn ${state.tab==="quiz" ?"active":""}" data-tab="quiz" >✏️ Pop Quiz</button>
+    <button class="tab-btn ${state.tab==="test" ?"active":""}" data-tab="test" >📄 Test Paper</button>
+  </div>
+
+  <div class="tab-content" id="tab-content">
+    ${renderTab()}
+  </div>`;
+}
+
+function renderTab() {
+  switch (state.tab) {
+    case "study": return renderStudyTab();
+    case "quiz":  return renderQuizTab();
+    case "test":  return renderTestTab();
+    default:      return "";
+  }
+}
+
+function attachChapterEvents() {
+  document.getElementById("back-to-subject")?.addEventListener("click", () => {
+    state.chapterId = null;
+    renderPage();
+  });
+
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.tab = btn.dataset.tab;
+      if (state.tab === "quiz" && state.quiz.length === 0) buildQuiz();
+      renderPage();
+    });
+  });
+
+  attachTabSpecificEvents();
+}
+
+function attachTabSpecificEvents() {
+  switch (state.tab) {
+    case "study": attachStudyEvents(); break;
+    case "quiz":  attachQuizEvents();  break;
+    case "test":  attachTestEvents();  break;
+  }
+}
+
+/* ================================================================
+   STUDY TAB
+   ================================================================ */
+function renderStudyTab() {
+  const ch = currentChapter();
+  const s  = currentSubject();
+  const topics = ch.topics || [];
+  const moves  = ch.boardMoves || [];
+
+  return `
+  <div class="study-wrap">
+    <div class="study-sidebar-box" style="--sc:${s.color}">
+      <h3>Key Topics</h3>
+      <ul class="topic-list">
+        ${topics.map(t => `<li>${escHtml(t)}</li>`).join("")}
+      </ul>
+      ${moves.length ? `
+      <h3 style="margin-top:1.2rem">Board Moves 🎯</h3>
+      <ul class="topic-list board-moves">
+        ${moves.map(m => `<li>${escHtml(m)}</li>`).join("")}
+      </ul>` : ""}
+    </div>
+
+    <div class="concept-list">
+      ${topics.map((topic, i) => `
+        <details class="concept-item" id="concept-${i}">
+          <summary class="concept-summary" style="--sc:${s.color}">
+            <span class="concept-num">${i+1}</span>
+            <span class="concept-title">${escHtml(topic)}</span>
+            <span class="concept-arrow">›</span>
+          </summary>
+          <div class="concept-body" id="concept-body-${i}">
+            <div class="concept-placeholder">
+              <p>Click "Explain with AI" to get a thorough board-focused explanation of <strong>${escHtml(topic)}</strong>.</p>
+              <button class="btn-explain-ai" data-topic="${escHtml(topic)}" data-idx="${i}" style="--sc:${s.color}">
+                ✦ Explain with AI
+              </button>
+            </div>
+          </div>
+        </details>`).join("")}
+    </div>
+  </div>`;
+}
+
+function attachStudyEvents() {
+  document.querySelectorAll(".btn-explain-ai").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const topic = btn.dataset.topic;
+      const idx   = btn.dataset.idx;
+      const body  = document.getElementById(`concept-body-${idx}`);
+      if (!body) return;
+
+      body.innerHTML = `<div class="ai-loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span> Generating explanation…</div>`;
+
+      try {
+        if (!hasApiKey()) throw new Error("NO_KEY");
+        const ch = currentChapter();
+        const s  = currentSubject();
+        const prompt = `Explain "${topic}" from the chapter "${ch.title}" in ${s.name} (CBSE Class XII).
+Cover: definition, key concepts, mechanism/significance, real-world or textbook example, and how CBSE frames this in board exams.
+Format your response clearly with headings and bullet points where appropriate.`;
+        const answer = await callClaude(prompt);
+        body.innerHTML = formatAiText(answer);
+      } catch (e) {
+        if (e.message === "NO_KEY") {
+          body.innerHTML = `<div class="no-key-msg">
+            <p>Add your Anthropic API key in <strong>Settings ⚙</strong> to get AI explanations.</p>
+            <p class="topic-static-note">Meanwhile, refer to your NCERT textbook for: <em>${escHtml(topic)}</em></p>
+          </div>`;
+        } else {
+          body.innerHTML = `<p class="error-msg">Error: ${escHtml(e.message)}</p>`;
+        }
+      }
+    });
+  });
+}
+
+/* ================================================================
+   QUIZ TAB
+   ================================================================ */
+function buildQuiz() {
+  const ch = currentChapter();
+  const pyqs = ch.pastYearQs || [];
+  state.quiz = shuffle(pyqs).map(q => ({ ...q, revealed: false }));
+}
+
+function renderQuizTab() {
+  const ch = currentChapter();
+  if (!state.quiz.length && ch.pastYearQs?.length) buildQuiz();
+  const items = state.quiz;
+  if (!items.length) return `<p class="empty-state">No quiz questions available for this chapter yet.</p>`;
+
+  const s = currentSubject();
+  return `
+  <div class="quiz-wrap">
+    <div class="quiz-header">
+      <span class="quiz-count">${items.length} question${items.length>1?"s":""} · shuffled</span>
+      <button class="btn-ghost-sm" id="quiz-refresh">🔀 New Order</button>
+    </div>
+    ${items.map((item, i) => `
+      <div class="q-card" id="qcard-${i}">
+        <div class="q-meta">
+          <span class="q-year">${item.year || ""}</span>
+          <span class="q-marks">${item.marks} mark${item.marks>1?"s":""}</span>
+        </div>
+        <div class="q-text">${escHtml(item.q)}</div>
+        <div class="answer-reveal ${item.revealed ? "open" : ""}" id="ans-${i}">
+          <div class="answer-inner">
+            <div class="answer-label">✔ Model Answer</div>
+            <div class="answer-body">${nl2p(item.a)}</div>
+          </div>
+        </div>
+        <button class="btn-reveal ${item.revealed ? "active" : ""}" data-idx="${i}" style="--sc:${s.color}">
+          ${item.revealed ? "Hide Answer ↑" : "Show Answer ↓"}
+        </button>
+      </div>`).join("")}
+  </div>`;
+}
+
+function attachQuizEvents() {
+  document.getElementById("quiz-refresh")?.addEventListener("click", () => {
+    buildQuiz();
+    renderPage();
+  });
+
+  document.querySelectorAll(".btn-reveal").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const i = parseInt(btn.dataset.idx);
+      state.quiz[i].revealed = !state.quiz[i].revealed;
+      const card = document.getElementById(`qcard-${i}`);
+      const ans  = document.getElementById(`ans-${i}`);
+      if (!card || !ans) return;
+      state.quiz[i].revealed ? ans.classList.add("open") : ans.classList.remove("open");
+      btn.textContent = state.quiz[i].revealed ? "Hide Answer ↑" : "Show Answer ↓";
+      btn.classList.toggle("active", state.quiz[i].revealed);
+    });
+  });
+}
+
+/* ================================================================
+   TEST PAPER TAB
+   ================================================================ */
+function renderTestTab() {
+  const s  = currentSubject();
+  const allChaps = s.books.flatMap(b => b.chapters);
+  const validMarks = (s.pattern?.questionMarks || [1,2,3,5]);
+
+  if (!state.paper) {
+    return `
+    <div class="test-config">
+      <h3 class="config-title">Build Your Test Paper</h3>
+
+      <div class="config-section">
+        <label class="config-label">Duration</label>
+        <div class="radio-group">
+          ${[60,120,180].map(d => `
+            <label class="radio-pill">
+              <input type="radio" name="duration" value="${d}" ${d===180?"checked":""}>
+              ${d===60?"1 hour":d===120?"2 hours":"3 hours"}
+            </label>`).join("")}
+        </div>
+      </div>
+
+      <div class="config-section">
+        <label class="config-label">Question Types</label>
+        <div class="check-group">
+          ${validMarks.map(m => `
+            <label class="check-pill">
+              <input type="checkbox" name="marks" value="${m}" checked>
+              ${m}-mark
+            </label>`).join("")}
+        </div>
+      </div>
+
+      <div class="config-section">
+        <label class="config-label">Chapters to include</label>
+        <div class="check-group chapter-checks">
+          ${allChaps.map(ch => `
+            <label class="check-pill ${ch.id === state.chapterId ? "current" : ""}">
+              <input type="checkbox" name="chapters" value="${ch.id}" checked>
+              ${escHtml(ch.title)}
+            </label>`).join("")}
+        </div>
+      </div>
+
+      <button class="btn-primary generate-btn" id="generate-paper" style="--sc:${s.color}">
+        Generate Test Paper →
+      </button>
+    </div>`;
+  }
+
+  /* paper already generated — render it */
+  return renderPaperView();
+}
+
+function attachTestEvents() {
+  if (!state.paper) {
+    document.getElementById("generate-paper")?.addEventListener("click", () => {
+      generatePaper();
+    });
+    return;
+  }
+  attachPaperEvents();
+}
+
+function generatePaper() {
+  const s        = currentSubject();
+  const allChaps = s.books.flatMap(b => b.chapters);
+  const duration = parseInt(document.querySelector('input[name="duration"]:checked')?.value || "180");
+  const markVals = [...document.querySelectorAll('input[name="marks"]:checked')].map(i => parseInt(i.value));
+  const chapIds  = [...document.querySelectorAll('input[name="chapters"]:checked')].map(i => i.value);
+
+  const selectedChaps = allChaps.filter(c => chapIds.includes(c.id));
+  if (!selectedChaps.length) { alert("Please select at least one chapter."); return; }
+  if (!markVals.length)      { alert("Please select at least one question type."); return; }
+
+  const pool = selectedChaps.flatMap(ch =>
+    (ch.pastYearQs || []).filter(q => markVals.includes(q.marks)).map(q => ({...q, _chapter: ch.title}))
+  );
+  const shuffled = shuffle(pool);
+
+  /* target total marks based on duration */
+  const targets = { 60: 30, 120: 55, 180: 80 };
+  const targetMarks = targets[duration] || 80;
+  const questions = [];
+  let total = 0;
+  for (const q of shuffled) {
+    if (total + q.marks <= targetMarks + 5) { questions.push(q); total += q.marks; }
+    if (total >= targetMarks) break;
+  }
+
+  state.paper = { duration, markVals, chapIds, questions, total, subject: s.name };
+  renderPage();
+}
+
+function renderPaperView() {
+  const p = state.paper;
+  const s = currentSubject();
+  const sectionsByMarks = {};
+  p.questions.forEach(q => {
+    if (!sectionsByMarks[q.marks]) sectionsByMarks[q.marks] = [];
+    sectionsByMarks[q.marks].push(q);
+  });
+  const sectionLetters = "ABCDEFGH";
+  let secIdx = 0;
+
+  const sections = Object.keys(sectionsByMarks).sort((a,b)=>a-b).map(marks => {
+    const qs = sectionsByMarks[marks];
+    const letter = sectionLetters[secIdx++];
+    return { letter, marks: parseInt(marks), qs };
+  });
+
+  return `
+  <div class="paper-wrap" id="paper-wrap">
+    <div class="paper-sheet" id="paper-sheet">
+      <div class="paper-header">
+        <div class="paper-school">BOARDBRIDGE PRACTICE TEST</div>
+        <div class="paper-subject">${escHtml(p.subject)} — Class XII</div>
+        <div class="paper-meta-row">
+          <span>Time: ${p.duration===60?"1 Hour":p.duration===120?"2 Hours":"3 Hours"}</span>
+          <span>Total Marks: ${p.total}</span>
+          <span>Date: ${new Date().toLocaleDateString("en-IN")}</span>
+        </div>
+        <div class="paper-instructions">
+          <strong>General Instructions:</strong> All questions are compulsory unless otherwise stated. Follow CBSE marking scheme. Write in neat, legible handwriting. Marks are indicated against each question.
+        </div>
+      </div>
+
+      ${sections.map(sec => `
+        <div class="paper-section">
+          <div class="paper-section-head">Section ${sec.letter} — ${sec.marks} Mark${sec.marks>1?"s":""} Each</div>
+          ${sec.qs.map((q, i) => `
+            <div class="paper-q" id="pq-${sec.letter}-${i}">
+              <div class="paper-q-num">Q${i+1}.</div>
+              <div class="paper-q-body">
+                <div class="paper-q-text">${escHtml(q.q)}</div>
+                <div class="paper-q-meta">
+                  ${q._chapter ? `<span class="chapter-tag">${escHtml(q._chapter)}</span>` : ""}
+                  ${q.year ? `<span class="year-tag">${q.year}</span>` : ""}
+                  <span class="marks-tag">[${q.marks} mark${q.marks>1?"s":""}]</span>
+                </div>
+                <div class="answer-reveal" id="pa-${sec.letter}-${i}">
+                  <div class="answer-inner">
+                    <div class="answer-label">✔ Model Answer</div>
+                    <div class="answer-body" id="pa-body-${sec.letter}-${i}">${nl2p(q.a)}</div>
+                  </div>
+                </div>
+              </div>
+            </div>`).join("")}
+        </div>`).join("")}
+    </div>
+
+    <div class="paper-actions">
+      <button class="btn-primary" id="show-all-answers" style="--sc:${s.color}">Show All Answers</button>
+      <button class="btn-ghost"   id="hide-all-answers">Hide Answers</button>
+      <button class="btn-ghost"   id="download-pdf">⬇ Download PDF</button>
+      <button class="btn-ghost"   id="new-paper">↺ New Paper</button>
+    </div>
+  </div>`;
+}
+
+function attachPaperEvents() {
+  document.getElementById("show-all-answers")?.addEventListener("click", () => {
+    document.querySelectorAll(".paper-wrap .answer-reveal").forEach(el => el.classList.add("open"));
+  });
+  document.getElementById("hide-all-answers")?.addEventListener("click", () => {
+    document.querySelectorAll(".paper-wrap .answer-reveal").forEach(el => el.classList.remove("open"));
+  });
+  document.getElementById("new-paper")?.addEventListener("click", () => {
+    state.paper = null;
+    renderPage();
+  });
+  document.getElementById("download-pdf")?.addEventListener("click", downloadPdf);
+}
+
+/* ================================================================
+   PDF DOWNLOAD
+   ================================================================ */
+function downloadPdf() {
+  const p = state.paper;
+  if (!p || !window.jspdf) { alert("PDF library not loaded yet. Please try again."); return; }
+  const { jsPDF } = window.jspdf;
+  const doc  = new jsPDF({ unit: "mm", format: "a4" });
+  const W    = 210, H = 297;
+  const ML   = 15, MR = 15, MT = 20;
+  let y      = MT;
+  const lw   = W - ML - MR;
+
+  function addText(text, opts = {}) {
+    const { size=11, bold=false, color=[30,30,30], indent=0, center=false } = opts;
+    doc.setFontSize(size);
+    doc.setFont("helvetica", bold ? "bold" : "normal");
+    doc.setTextColor(...color);
+    const x = center ? W/2 : ML + indent;
+    const align = center ? "center" : "left";
+    const lines = doc.splitTextToSize(String(text), lw - indent);
+    lines.forEach(line => {
+      if (y > H - 20) { doc.addPage(); y = MT; }
+      doc.text(line, x, y, { align });
+      y += size * 0.45;
+    });
+    y += 2;
+  }
+
+  addText("BOARDBRIDGE PRACTICE TEST", { size:14, bold:true, center:true, color:[30,30,110] });
+  addText(`${p.subject} — Class XII`, { size:12, center:true });
+  addText(`Time: ${p.duration===60?"1 Hr":p.duration===120?"2 Hrs":"3 Hrs"}   |   Total Marks: ${p.total}   |   Date: ${new Date().toLocaleDateString("en-IN")}`, { size:9, center:true, color:[100,100,100] });
+  y += 4;
+  doc.setDrawColor(180,180,180);
+  doc.line(ML, y, W-MR, y); y += 6;
+
+  const sectionsByMarks = {};
+  p.questions.forEach(q => {
+    if (!sectionsByMarks[q.marks]) sectionsByMarks[q.marks] = [];
+    sectionsByMarks[q.marks].push(q);
+  });
+  const letters = "ABCDEFGH";
+  let si = 0;
+
+  Object.keys(sectionsByMarks).sort((a,b)=>a-b).forEach(marks => {
+    const qs = sectionsByMarks[marks];
+    const letter = letters[si++];
+    addText(`Section ${letter} — ${marks} Mark${marks>1?"s":""} Each`, { size:11, bold:true, color:[60,60,140] });
+    y += 1;
+    qs.forEach((q, i) => {
+      addText(`Q${i+1}. ${q.q}`, { size:10, indent:2 });
+      addText(`[${q.marks} mark${q.marks>1?"s":""}]${q.year ? " · "+q.year : ""}`, { size:8, indent:4, color:[120,120,120] });
+      y += 3;
+      addText("Model Answer:", { size:9, bold:true, indent:4, color:[0,100,0] });
+      addText(q.a, { size:9, indent:4, color:[30,70,30] });
+      y += 4;
+      doc.setDrawColor(220,220,220);
+      doc.line(ML+4, y, W-MR-4, y); y += 5;
+    });
+    y += 3;
+  });
+
+  doc.save(`BoardBridge_${p.subject.replace(/\s+/g,"-")}_${Date.now()}.pdf`);
+}
+
+/* ================================================================
+   SEARCH
+   ================================================================ */
+function renderSearch() {
+  const q = state.search.toLowerCase();
+  const results = allChapters().filter(ch =>
+    ch.title.toLowerCase().includes(q) ||
+    (ch.topics||[]).some(t => t.toLowerCase().includes(q)) ||
+    (ch.hook||"").toLowerCase().includes(q)
+  );
+
+  return `
+  <div class="search-results">
+    <h2 class="search-heading">Results for "${escHtml(state.search)}"</h2>
+    ${results.length ? results.map(ch => `
+      <button class="search-result-card" data-subject="${ch._subject.id}" data-chapter="${ch.id}">
+        <div class="src-meta">${escHtml(ch._subject.name)} · ${ch.unit||""}</div>
+        <div class="src-title">${escHtml(ch.title)}</div>
+        <div class="src-hook">${escHtml(ch.hook||"")}</div>
+      </button>`).join("")
+    : `<p class="empty-state">No chapters match "<em>${escHtml(state.search)}</em>". Try a broader term.</p>`}
+  </div>`;
+}
+
+function attachSearchEvents() {
+  document.querySelectorAll(".search-result-card").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.subjectId  = btn.dataset.subject;
+      state.chapterId  = btn.dataset.chapter;
+      state.tab        = "study";
+      state.search     = "";
+      document.getElementById("global-search").value = "";
+      renderSidebar();
+      renderPage();
+    });
+  });
+}
+
+/* ================================================================
+   FLOATING AI CHAT
+   ================================================================ */
+function initChat() {
+  const trigger = document.getElementById("ai-trigger");
+  const panel   = document.getElementById("ai-panel");
+  const closeBtn= document.getElementById("ai-close");
+  const input   = document.getElementById("ai-input");
+  const sendBtn = document.getElementById("ai-send");
+
+  if (!trigger || !panel) return;
+
+  trigger.addEventListener("click", () => {
+    const open = panel.getAttribute("aria-hidden") === "false";
+    panel.setAttribute("aria-hidden", open ? "true" : "false");
+    panel.classList.toggle("open", !open);
+    trigger.classList.toggle("active", !open);
+    if (!open) input?.focus();
+  });
+
+  closeBtn?.addEventListener("click", () => {
+    panel.setAttribute("aria-hidden", "true");
+    panel.classList.remove("open");
+    trigger.classList.remove("active");
+  });
+
+  sendBtn?.addEventListener("click", sendChatMessage);
+  input?.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+  });
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById("ai-input");
+  const msgs  = document.getElementById("ai-messages");
+  if (!input || !msgs) return;
+
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = "";
+
+  /* Append user message */
+  appendChatMsg("user", text);
+
+  /* Typing indicator */
+  const typingId = "typing-" + Date.now();
+  msgs.insertAdjacentHTML("beforeend", `
+    <div class="ai-msg bot-msg typing-indicator" id="${typingId}">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    </div>`);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  try {
+    if (!hasApiKey()) throw new Error("NO_KEY");
+
+    /* Fetch web sources for context */
+    const subLabel = currentSubject()?.name || "CBSE XII";
+    const context  = await fetchSourceBundle(`${text} ${subLabel}`).catch(() => "");
+    const answer   = await callClaude(text, context);
+
+    document.getElementById(typingId)?.remove();
+    appendChatMsg("bot", answer);
+  } catch (e) {
+    document.getElementById(typingId)?.remove();
+    if (e.message === "NO_KEY") {
+      appendChatMsg("bot", "I need an Anthropic API key to answer. Tap ⚙ Settings (sidebar) and add your key from console.anthropic.com.");
+    } else {
+      appendChatMsg("bot", `Sorry, I ran into an error: ${e.message}`);
+    }
+  }
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function appendChatMsg(role, text) {
+  const msgs = document.getElementById("ai-messages");
+  if (!msgs) return;
+  const cls  = role === "user" ? "user-msg" : "bot-msg";
+  const body = role === "bot" ? formatAiText(text) : `<p>${escHtml(text)}</p>`;
+  msgs.insertAdjacentHTML("beforeend", `<div class="ai-msg ${cls}">${body}</div>`);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function formatAiText(text) {
+  /* Convert markdown-ish AI output to readable HTML */
+  let html = escHtml(text);
+  /* Bold: **text** */
+  html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  /* Headers: lines starting with # */
+  html = html.replace(/^###\s+(.+)$/gm, "<h4>$1</h4>");
+  html = html.replace(/^##\s+(.+)$/gm,  "<h3>$1</h3>");
+  html = html.replace(/^#\s+(.+)$/gm,   "<h3>$1</h3>");
+  /* Bullet points */
+  html = html.replace(/^[•\-\*]\s+(.+)$/gm, "<li>$1</li>");
+  html = html.replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>");
+  /* Numbered list */
+  html = html.replace(/^\d+\.\s+(.+)$/gm, "<li>$1</li>");
+  /* Paragraphs: double newline */
+  html = html.replace(/\n\n+/g, "</p><p>");
+  html = html.replace(/\n/g, "<br>");
+  return `<p>${html}</p>`;
+}
+
+/* ================================================================
+   SETTINGS PANEL
+   ================================================================ */
+function initSettings() {
+  const overlay   = document.getElementById("settings-overlay");
+  const openBtn   = document.getElementById("open-settings");
+  const closeBtn  = document.getElementById("close-settings");
+  const saveBtn   = document.getElementById("save-api-key");
+  const clearBtn  = document.getElementById("clear-api-key");
+  const keyInput  = document.getElementById("api-key-input");
+  const keyStatus = document.getElementById("key-status");
+
+  function openSettings() {
+    overlay.removeAttribute("hidden");
+    keyInput.value = getApiKey();
+    updateKeyStatus();
+  }
+  function closeSettings() { overlay.setAttribute("hidden", ""); }
+
+  function updateKeyStatus() {
+    const has = hasApiKey();
+    if (keyStatus) {
+      keyStatus.textContent = has ? "✔ API key saved — AI features active" : "No key saved. AI features unavailable.";
+      keyStatus.className   = "key-status " + (has ? "ok" : "");
+    }
+    const sub = document.getElementById("ai-panel-sub");
+    if (sub) sub.textContent = has ? "CBSE Class XII · Claude-powered ✔" : "CBSE Class XII · Add API key to activate";
+  }
+
+  openBtn?.addEventListener("click", openSettings);
+  closeBtn?.addEventListener("click", closeSettings);
+  overlay?.addEventListener("click", e => { if (e.target === overlay) closeSettings(); });
+
+  saveBtn?.addEventListener("click", () => {
+    const val = keyInput?.value.trim();
+    if (!val || !val.startsWith("sk-ant-")) {
+      alert("Invalid key. It should start with sk-ant-"); return;
+    }
+    localStorage.setItem("boardbridge_api_key", val);
+    updateKeyStatus();
+    closeSettings();
+  });
+
+  clearBtn?.addEventListener("click", () => {
+    localStorage.removeItem("boardbridge_api_key");
+    if (keyInput) keyInput.value = "";
+    updateKeyStatus();
+  });
+
+  updateKeyStatus();
+}
+
+/* ================================================================
+   GLOBAL EVENTS
+   ================================================================ */
+function attachGlobalEvents() {
+  /* Search */
+  document.getElementById("global-search")?.addEventListener("input", e => {
+    state.search = e.target.value.trim();
+    renderPage();
+  });
+
+  /* Mobile hamburger */
+  document.getElementById("hamburger")?.addEventListener("click", () => {
+    const sidebar = document.getElementById("sidebar");
+    const open    = sidebar?.classList.contains("open");
+    sidebar?.classList.toggle("open", !open);
+    document.getElementById("hamburger")?.setAttribute("aria-expanded", String(!open));
+  });
+
+  /* Sidebar backdrop click */
+  document.addEventListener("click", e => {
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar?.classList.contains("open") &&
+        !sidebar.contains(e.target) &&
+        !e.target.closest("#hamburger")) {
+      closeSidebar();
+    }
+  });
+
+  /* PWA install */
+  window.addEventListener("beforeinstallprompt", e => {
+    e.preventDefault();
+    state.deferredInstall = e;
+    const btn = document.getElementById("install-app");
+    if (btn) btn.hidden = false;
+  });
+  document.getElementById("install-app")?.addEventListener("click", async () => {
+    if (!state.deferredInstall) return;
+    state.deferredInstall.prompt();
+    const { outcome } = await state.deferredInstall.userChoice;
+    if (outcome === "accepted") {
+      state.deferredInstall = null;
+      const btn = document.getElementById("install-app");
+      if (btn) btn.hidden = true;
+    }
+  });
+}
+
+function closeSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  sidebar?.classList.remove("open");
+  document.getElementById("hamburger")?.setAttribute("aria-expanded", "false");
+}
+
+/* ================================================================
+   SERVICE WORKER
+   ================================================================ */
+function registerServiceWorker() {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js").catch(() => {});
+  }
+}
+
+/* ================================================================
+   INIT
+   ================================================================ */
 function init() {
-  els.metrics.subjects.textContent = DATA.subjects.length;
-  els.metrics.chapters.textContent = allChapters().length;
-  els.metrics.sources.textContent = DATA.sources.length;
-  renderSubjectList();
-  renderAll();
-  attachEvents();
+  renderSidebar();
+  renderCountdown();
+  renderPage();
+  initChat();
+  initSettings();
+  attachGlobalEvents();
   registerServiceWorker();
 }
 
-function attachEvents() {
-  els.globalSearch.addEventListener("input", (event) => {
-    state.query = event.target.value.trim().toLowerCase();
-    renderAll();
-  });
-
-  document.querySelectorAll(".tab").forEach((tab) => {
-    tab.addEventListener("click", () => {
-      state.activeTab = tab.dataset.tab;
-      document.querySelectorAll(".tab").forEach((item) => item.classList.toggle("is-active", item === tab));
-      Object.entries(els.panels).forEach(([key, panel]) => panel.classList.toggle("is-active", key === state.activeTab));
-      renderAll();
-    });
-  });
-
-  els.printButton.addEventListener("click", () => {
-    if (state.paper) downloadPdf();
-    else window.print();
-  });
-
-  window.addEventListener("beforeinstallprompt", (event) => {
-    event.preventDefault();
-    state.deferredInstall = event;
-    els.installButton.hidden = false;
-  });
-
-  els.installButton.addEventListener("click", async () => {
-    if (!state.deferredInstall) return;
-    state.deferredInstall.prompt();
-    await state.deferredInstall.userChoice;
-    state.deferredInstall = null;
-  });
-
-  els.openSettings.addEventListener("click", () => {
-    els.settingsOverlay.hidden = false;
-    const stored = localStorage.getItem("boardbridge_api_key");
-    els.apiKeyInput.value = stored ? "sk-ant-•••••••••••" : "";
-    els.keyStatus.textContent = stored ? "Key is saved." : "";
-    els.keyStatus.className = stored ? "key-status ok" : "key-status";
-  });
-
-  els.closeSettings.addEventListener("click", () => { els.settingsOverlay.hidden = true; });
-  els.settingsOverlay.addEventListener("click", (e) => { if (e.target === els.settingsOverlay) els.settingsOverlay.hidden = true; });
-
-  els.saveApiKey.addEventListener("click", () => {
-    const val = els.apiKeyInput.value.trim();
-    if (!val || val.startsWith("sk-ant-•")) {
-      els.keyStatus.textContent = "Enter a real key first.";
-      els.keyStatus.className = "key-status err";
-      return;
-    }
-    localStorage.setItem("boardbridge_api_key", val);
-    els.keyStatus.textContent = "Key saved. AI assistant is now active.";
-    els.keyStatus.className = "key-status ok";
-    els.apiKeyInput.value = "sk-ant-•••••••••••";
-  });
-
-  els.clearApiKey.addEventListener("click", () => {
-    localStorage.removeItem("boardbridge_api_key");
-    els.apiKeyInput.value = "";
-    els.keyStatus.textContent = "Key cleared. Using built-in syllabus logic.";
-    els.keyStatus.className = "key-status";
-  });
-
-  els.mobileNavToggle.addEventListener("click", () => {
-    const collapsed = els.rail.classList.toggle("rail-collapsed");
-    els.mobileNavToggle.setAttribute("aria-expanded", String(!collapsed));
-    els.mobileNavToggle.textContent = collapsed ? "☰" : "✕";
-  });
-}
-
-function renderAll() {
-  const subject = selectedSubject();
-  els.pageTitle.textContent = `${subject.name} study desk`;
-  renderSubjectList();
-  renderStudy();
-  renderQuiz();
-  renderPaper();
-  renderAssistant();
-  renderSources();
-}
-
-function renderSubjectList() {
-  els.subjectList.innerHTML = DATA.subjects
-    .map((subject) => {
-      const count = subject.books.reduce((sum, book) => sum + book.chapters.length, 0);
-      return `
-        <button class="subject-button ${subject.id === state.selectedSubjectId ? "is-active" : ""}" data-subject="${subject.id}">
-          <span class="subject-icon" aria-hidden="true">${escapeHtml(subject.icon)}</span>
-          <span>
-            <strong>${escapeHtml(subject.name)}</strong>
-            <span>Code ${escapeHtml(subject.code)} - ${count} units</span>
-          </span>
-        </button>
-      `;
-    })
-    .join("");
-
-  els.subjectList.querySelectorAll("[data-subject]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.selectedSubjectId = button.dataset.subject;
-      state.selectedChapterId = null;
-      state.quiz = [];
-      renderAll();
-    });
-  });
-}
-
-function renderStudy() {
-  const subject = selectedSubject();
-  const chapters = filteredChapters(subject);
-  if (!chapters.length) {
-    els.panels.study.innerHTML = emptyState();
-    return;
-  }
-
-  const selected = chapters.find((item) => item.chapter.id === state.selectedChapterId) || chapters[0];
-  state.selectedChapterId = selected.chapter.id;
-  const chapter = selected.chapter;
-  const book = selected.book;
-
-  els.panels.study.innerHTML = `
-    <div class="study-layout">
-      <div class="chapter-list" aria-label="Chapters">
-        ${chapters
-          .map(({ chapter: item, book: itemBook }) => `
-            <button class="chapter-button ${item.id === chapter.id ? "is-active" : ""}" data-chapter="${item.id}">
-              <strong>${escapeHtml(item.title)}</strong>
-              <span class="chapter-meta">${escapeHtml(item.unit)} - ${escapeHtml(itemBook.title)} - ${item.marks || "Flexible"} marks</span>
-            </button>
-          `)
-          .join("")}
-      </div>
-
-      <div>
-        <article class="tool-card">
-          <p class="eyebrow">${escapeHtml(subject.name)} - ${escapeHtml(book.title)}</p>
-          <h3>${escapeHtml(chapter.title)}</h3>
-          <p>${escapeHtml(chapter.hook)}</p>
-          <div class="summary-grid">
-            <div class="summary-item"><span>Subject code</span><strong>${escapeHtml(subject.code)}</strong></div>
-            <div class="summary-item"><span>Theory marks</span><strong>${subject.theoryMarks}</strong></div>
-            <div class="summary-item"><span>Internal/practical</span><strong>${subject.practicalMarks}</strong></div>
-            <div class="summary-item"><span>Exam duration</span><strong>${subject.durationMinutes / 60} hr</strong></div>
-          </div>
-          <div class="tag-row">${chapter.boardMoves.map((move) => `<span class="chip">${escapeHtml(move)}</span>`).join("")}</div>
-        </article>
-
-        <article class="tool-card">
-          <h3>Topic Explainers</h3>
-          <p class="small-note">Open any topic to get a teacher-style explanation, exam angle, example, and common mistake to avoid.</p>
-          <div class="concept-stack">
-            ${chapter.topics.map((topic) => conceptRow(subject, chapter, topic)).join("")}
-          </div>
-        </article>
-
-        <article class="tool-card">
-          <h3>Chapter Topics</h3>
-          <ul class="topic-list">
-            ${chapter.topics.map((topic) => `<li>${escapeHtml(topic)}</li>`).join("")}
-          </ul>
-        </article>
-      </div>
-    </div>
-  `;
-
-  els.panels.study.querySelectorAll("[data-chapter]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.selectedChapterId = button.dataset.chapter;
-      renderStudy();
-    });
-  });
-}
-
-function conceptRow(subject, chapter, topic) {
-  const lesson = teacherExplanation(subject, chapter, topic);
-  return `
-    <details class="concept-row">
-      <summary>
-        <span>
-          <strong>${escapeHtml(topic)}</strong>
-          <small>${escapeHtml(lesson.oneLine)}</small>
-        </span>
-      </summary>
-      <div class="topic-lesson">
-        <div>
-          <h4>Understand It</h4>
-          <p>${escapeHtml(lesson.explain)}</p>
-        </div>
-        <div>
-          <h4>Why It Matters</h4>
-          <p>${escapeHtml(lesson.why)}</p>
-        </div>
-        <div>
-          <h4>Exam Answer Frame</h4>
-          <ol class="answer-list">
-            ${lesson.answerFrame.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
-          </ol>
-        </div>
-        <div class="example-strip">
-          <strong>Example</strong>
-          <p>${escapeHtml(lesson.example)}</p>
-        </div>
-        <div class="mistake-strip">
-          <strong>Do not write</strong>
-          <p>${escapeHtml(lesson.mistake)}</p>
-        </div>
-      </div>
-    </details>
-  `;
-}
-
-function conceptExplanation(subject, chapter, topic) {
-  const subjectLens = {
-    "legal-studies": "define the legal idea, name the forum or rule when relevant, then apply it to a short fact situation",
-    psychology: "state the concept, connect it to behaviour, and add one everyday example without turning it into medical advice",
-    economics: "start with the definition, show the mechanism or formula, and end with the effect on households, firms, or government",
-    "political-science": "place the idea in its historical or institutional context, then explain the consequence for power, democracy, or policy",
-    "english-core": "move from literal meaning to theme, tone, device, and a clean evidence-based inference",
-    "commercial-art": "identify the visual feature, link it to style or composition, and explain the effect on the viewer"
-  };
-  return `For ${topic}, ${subjectLens[subject.id]}. In ${chapter.title}, treat it as a board-answer building block: one clear meaning, one connection to the chapter, and one example or consequence.`;
-}
-
-function teacherExplanation(subject, chapter, topic) {
-  const lenses = {
-    "legal-studies": {
-      oneLine: "Law concept, rule, forum, remedy, and application.",
-      explain: `${topic} should be understood as part of the legal machinery in "${chapter.title}". First ask what legal problem it solves, who uses it, and what result it produces. Then connect it to the relevant institution, statute, right, duty, or remedy from the chapter.`,
-      why: `CBSE Legal Studies often tests whether a student can move from a fact situation to the correct legal idea. This topic can become a direct definition, a case-based application, or a short comparison question.`,
-      example: `If the question gives a dispute, identify the parties, the legal issue, the forum or rule, and the likely legal consequence. For ${topic}, keep the answer tied to ${chapter.title}.`,
-      mistake: "Do not write a general moral answer. Legal Studies answers must use legal terms and apply them to the facts."
-    },
-    psychology: {
-      oneLine: "Meaning, behaviour link, example, and careful terminology.",
-      explain: `${topic} is best learnt by connecting the term to observable behaviour. Define the concept, explain the process or feature, and show how it affects thinking, emotion, personality, stress, therapy, or social behaviour in "${chapter.title}".`,
-      why: "Psychology papers reward precise concepts and examples. A strong answer names the process, shows understanding, and avoids casual or diagnostic language unless the syllabus uses it.",
-      example: `For a behaviour-based question, describe what the person is doing, match it to ${topic}, and explain why that match is correct.`,
-      mistake: "Do not turn every answer into personal advice or diagnosis. Use syllabus language and write academically."
-    },
-    economics: {
-      oneLine: "Definition, mechanism, formula/data link, and effect.",
-      explain: `${topic} should be studied as an economic relationship. Define it, identify the variables or components, and explain the direction of effect in "${chapter.title}". If a formula, graph, account, or policy tool is involved, name it clearly.`,
-      why: "Economics questions often test whether you can classify, calculate, compare, and explain cause-effect. Marks come from clean steps, not long paragraphs.",
-      example: `If ${topic} appears in a numerical or policy question, write the formula or mechanism first, substitute the given data if any, and end with the economic meaning.`,
-      mistake: "Do not mix similar terms such as stock/flow, final/intermediate, revenue/capital, or fixed/flexible without a clear distinction."
-    },
-    "political-science": {
-      oneLine: "Context, actors, timeline, consequence, and evaluation.",
-      explain: `${topic} belongs to a political process in "${chapter.title}". Start with the historical or institutional context, identify the main actors, and explain how it changed power, democracy, policy, identity, or international relations.`,
-      why: "Political Science answers score when they are structured: context first, then explanation, then consequence. CBSE also asks passage, cartoon, and map-based application.",
-      example: `For ${topic}, connect the event or concept to a named institution, leader, region, country, policy, or movement from the chapter.`,
-      mistake: "Do not write opinion alone. Support each point with syllabus-based facts and political consequences."
-    },
-    "english-core": {
-      oneLine: "Literal meaning, theme, device, evidence, and inference.",
-      explain: `${topic} should be understood through the text, not as a memorised paragraph. Begin with what happens or what the phrase suggests, then connect it to theme, character, tone, imagery, or narrative purpose.`,
-      why: "English Core marking rewards inference and textual understanding. Strong answers are concise, evidence-based, and sensitive to tone.",
-      example: `If asked about ${topic}, write the direct meaning, mention the relevant moment or speaker, and explain the larger theme it reveals.`,
-      mistake: "Do not retell the whole chapter. Answer the exact question and include a short textual reference."
-    },
-    "commercial-art": {
-      oneLine: "Visual feature, school/style, artist-work link, and effect.",
-      explain: `${topic} should be read visually. Identify the school, artwork, technique, design principle, or practical requirement, then explain how line, colour, composition, subject, lettering, or style creates meaning.`,
-      why: "Applied Art questions often ask identification and explanation. In practical work, marks depend on composition, clarity, colour use, and overall impression.",
-      example: `For ${topic}, mention the visible feature first, then link it to the school, period, artist, design purpose, or practical marking criterion.`,
-      mistake: "Do not give vague appreciation only. Use visual vocabulary such as composition, emphasis, colour scheme, proportion, and typography."
-    }
-  };
-  const lens = lenses[subject.id];
-  return {
-    ...lens,
-    answerFrame: [
-      `Define ${topic} in one clean sentence.`,
-      `Connect it directly to ${chapter.title}.`,
-      `Add one syllabus point: ${chapter.boardMoves[0] || chapter.topics[0]}.`,
-      "End with an example, effect, or conclusion matching the marks."
-    ]
-  };
-}
-
-function renderQuiz() {
-  const subject = selectedSubject();
-  const chapters = flattenSubject(subject);
-  const selectedChapter = chapters.find((item) => item.chapter.id === state.selectedChapterId) || chapters[0];
-
-  els.panels.quiz.innerHTML = `
-    <div class="paper-layout">
-      <div class="tool-card">
-        <h3>Fresh Pop Quiz</h3>
-        <div class="control-grid">
-          <div class="field">
-            <label for="quiz-chapter">Chapter</label>
-            <select id="quiz-chapter">
-              ${chapters.map(({ chapter, book }) => `<option value="${chapter.id}" ${chapter.id === selectedChapter.chapter.id ? "selected" : ""}>${escapeHtml(chapter.title)} - ${escapeHtml(book.title)}</option>`).join("")}
-            </select>
-          </div>
-          <div class="field">
-            <label for="quiz-count">Questions</label>
-            <select id="quiz-count">
-              <option value="5">5</option>
-              <option value="8">8</option>
-              <option value="10">10</option>
-            </select>
-          </div>
-        </div>
-        <div class="button-row">
-          <button class="primary-button" id="make-quiz">New attempt</button>
-        </div>
-      </div>
-      <div class="tool-card">
-        <h3>Quiz Questions</h3>
-        <div class="quiz-stack" id="quiz-stack">
-          ${state.quiz.length ? renderQuizQuestions(state.quiz) : `<p class="small-note">Pick a chapter and start a fresh attempt.</p>`}
-        </div>
-      </div>
-    </div>
-  `;
-
-  els.panels.quiz.querySelector("#quiz-chapter").addEventListener("change", (event) => {
-    state.selectedChapterId = event.target.value;
-  });
-
-  els.panels.quiz.querySelector("#make-quiz").addEventListener("click", () => {
-    const chapterId = els.panels.quiz.querySelector("#quiz-chapter").value;
-    const count = Number(els.panels.quiz.querySelector("#quiz-count").value);
-    const item = chapters.find(({ chapter }) => chapter.id === chapterId);
-    state.selectedChapterId = chapterId;
-    state.quiz = generateQuiz(subject, item.book, item.chapter, count);
-    renderQuiz();
-  });
-
-  wireAnswerToggles(els.panels.quiz);
-}
-
-function renderQuizQuestions(questions) {
-  return questions
-    .map((question, index) => `
-      <article class="question-card">
-        <div class="question-meta">Question ${index + 1} - ${escapeHtml(question.type)}</div>
-        <h4>${escapeHtml(question.prompt)}</h4>
-        ${question.options ? `<div class="options-grid">${question.options.map((option, optionIndex) => `<div class="option"><strong>${String.fromCharCode(65 + optionIndex)}</strong><span>${escapeHtml(option)}</span></div>`).join("")}</div>` : ""}
-        <button class="answer-toggle" data-answer="${index}">Show answer</button>
-        <div class="answer-box" id="answer-${index}">${escapeHtml(question.answer)}</div>
-      </article>
-    `)
-    .join("");
-}
-
-function generateQuiz(subject, book, chapter, count) {
-  const all = flattenSubject(subject);
-  const otherTopics = all
-    .filter((item) => item.chapter.id !== chapter.id)
-    .flatMap((item) => item.chapter.topics)
-    .filter(Boolean);
-  const topics = shuffle(chapter.topics);
-  const moves = shuffle(chapter.boardMoves);
-
-  return Array.from({ length: count }, (_, index) => {
-    const topic = topics[index % topics.length];
-    const move = moves[index % moves.length] || "core concept";
-    const type = index % 3 === 0 ? "MCQ" : index % 3 === 1 ? "Quick explain" : "Exam move";
-
-    if (type === "MCQ") {
-      const options = shuffle([topic, ...shuffle(otherTopics).slice(0, 3)]);
-      return {
-        type,
-        prompt: `Which option belongs most directly to "${chapter.title}"?`,
-        options,
-        answer: `${topic} is part of ${chapter.title} in ${book.title}.`
-      };
-    }
-
-    if (type === "Quick explain") {
-      return {
-        type,
-        prompt: `Explain "${topic}" in a two-line board-answer style.`,
-        answer: `${topic}: give a direct meaning, connect it to ${chapter.title}, and add one example or consequence. Keep the answer specific and avoid storytelling.`
-      };
-    }
-
-    return {
-      type,
-      prompt: `A teacher says this chapter often tests "${move}". What should the answer include?`,
-      answer: `Write the definition or context first, add the relevant syllabus point from ${chapter.title}, and finish with why ${move} matters in an exam situation.`
-    };
-  });
-}
-
-function renderPaper() {
-  const subject = selectedSubject();
-  const chapters = flattenSubject(subject);
-  const selectedChapterIds = new Set(chapters.slice(0, Math.min(4, chapters.length)).map((item) => item.chapter.id));
-
-  els.panels.paper.innerHTML = `
-    <div class="paper-layout">
-      <div class="tool-card">
-        <h3>Test Paper Builder</h3>
-        <div class="control-grid">
-          <div class="field">
-            <label for="paper-duration">Duration</label>
-            <select id="paper-duration">
-              <option value="60">1 hour</option>
-              <option value="120">2 hours</option>
-              <option value="180" selected>3 hours</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="paper-book">Book</label>
-            <select id="paper-book">
-              <option value="all">All books</option>
-              ${subject.books.map((book) => `<option value="${book.id}">${escapeHtml(book.title)}</option>`).join("")}
-            </select>
-          </div>
-        </div>
-        <fieldset class="check-group">
-          <legend>Marks Categories</legend>
-          <div class="check-list">
-            ${[1, 2, 3, 4, 5, 6].map((mark) => `<label><input type="checkbox" name="marks" value="${mark}" ${subject.pattern.requestedMarksSupported.includes(mark) ? "checked" : ""}> ${marksLabels[mark]}</label>`).join("")}
-          </div>
-        </fieldset>
-        <fieldset class="check-group">
-          <legend>Chapters</legend>
-          <div class="chapter-checks" id="chapter-checks">
-            ${chapters.map(({ chapter, book }) => `
-              <label data-book="${book.id}">
-                <input type="checkbox" name="paper-chapter" value="${chapter.id}" ${selectedChapterIds.has(chapter.id) ? "checked" : ""}>
-                <span>${escapeHtml(chapter.title)} <span class="chapter-meta">${escapeHtml(book.title)}</span></span>
-              </label>
-            `).join("")}
-          </div>
-        </fieldset>
-        <div class="button-row">
-          <button class="primary-button" id="generate-paper">Prepare paper</button>
-          <button class="secondary-button" id="show-answers" ${state.paper && state.paper.answerStatus !== "loading" ? "" : "disabled"}>${answerButtonLabel()}</button>
-          <button class="secondary-button" id="download-pdf" ${state.paper ? "" : "disabled"}>Download PDF</button>
-        </div>
-        <p class="small-note">The paper follows public CBSE pattern references. Answer reveal prepares exam-style answers and cites the sources it could fetch.</p>
-      </div>
-      <div class="paper-preview" id="paper-preview">
-        ${state.paper ? renderPaperPreview(state.paper) : `<div class="empty-state"><h3>No paper yet</h3><p>Select chapters, marks, and duration to generate a test.</p></div>`}
-      </div>
-    </div>
-  `;
-
-  const bookSelect = els.panels.paper.querySelector("#paper-book");
-  bookSelect.addEventListener("change", () => filterPaperBook(bookSelect.value));
-
-  els.panels.paper.querySelector("#generate-paper").addEventListener("click", () => {
-    const selectedMarks = Array.from(els.panels.paper.querySelectorAll("input[name='marks']:checked")).map((input) => Number(input.value));
-    const selectedIds = Array.from(els.panels.paper.querySelectorAll("input[name='paper-chapter']:checked")).map((input) => input.value);
-    const duration = Number(els.panels.paper.querySelector("#paper-duration").value);
-    const selected = chapters.filter(({ chapter }) => selectedIds.includes(chapter.id));
-    state.paper = generatePaper(subject, selected, selectedMarks.length ? selectedMarks : [1, 2, 3, 4, 5, 6], duration);
-    renderPaper();
-  });
-
-  els.panels.paper.querySelector("#show-answers").addEventListener("click", async () => {
-    if (!state.paper) return;
-    if (!state.paper.answersReady) {
-      state.paper.answerStatus = "loading";
-      renderPaper();
-      await enrichPaperAnswers(state.paper);
-      state.paper.answersReady = true;
-      state.paper.answerStatus = "ready";
-      state.paper.showAnswers = true;
-    } else {
-      state.paper.showAnswers = !state.paper.showAnswers;
-    }
-    renderPaper();
-  });
-
-  els.panels.paper.querySelector("#download-pdf").addEventListener("click", () => window.print());
-}
-
-function answerButtonLabel() {
-  if (!state.paper) return "Show answers";
-  if (state.paper.answerStatus === "loading") return "Preparing answers...";
-  if (!state.paper.answersReady) return "Fetch answers";
-  return state.paper.showAnswers ? "Hide answers" : "Show answers";
-}
-
-function filterPaperBook(bookId) {
-  els.panels.paper.querySelectorAll("#chapter-checks label").forEach((label) => {
-    const visible = bookId === "all" || label.dataset.book === bookId;
-    label.style.display = visible ? "grid" : "none";
-    if (!visible) label.querySelector("input").checked = false;
-  });
-}
-
-function generatePaper(subject, selectedItems, selectedMarks, duration) {
-  const items = selectedItems.length ? selectedItems : flattenSubject(subject).slice(0, 4);
-  const maxMarks = subject.theoryMarks;
-  const target = Math.min(maxMarks, targetByDuration[duration] || maxMarks, subject.durationMinutes === 120 ? 30 : maxMarks);
-  const questions = [];
-  let total = 0;
-  let cursor = 0;
-  const sortedMarks = selectedMarks.sort((a, b) => a - b);
-
-  while (total < target && questions.length < 42) {
-    const mark = sortedMarks[cursor % sortedMarks.length];
-    if (total + mark > target + 4) {
-      cursor += 1;
-      continue;
-    }
-    const item = items[cursor % items.length];
-    const topic = item.chapter.topics[cursor % item.chapter.topics.length];
-    questions.push(buildQuestion(subject, item.book, item.chapter, topic, mark, questions.length + 1));
-    total += mark;
-    cursor += 1;
-  }
-
-  return {
-    id: `paper-${Date.now()}`,
-    subject,
-    items,
-    duration,
-    total,
-    target,
-    showAnswers: false,
-    answersReady: false,
-    answerStatus: "idle",
-    generatedAt: new Date().toLocaleString(),
-    questions
-  };
-}
-
-function buildQuestion(subject, book, chapter, topic, mark, number) {
-  const verbs = {
-    1: ["Identify", "Name", "Choose the correct idea about"],
-    2: ["State two points on", "Briefly explain", "Differentiate in brief"],
-    3: ["Explain with an example", "Describe the role of", "Write a short note on"],
-    4: ["Analyse", "Compare and explain", "Apply the concept of"],
-    5: ["Evaluate", "Discuss with suitable arguments", "Explain the significance of"],
-    6: ["Critically examine", "Discuss in detail", "Assess with examples"]
-  };
-  const verb = verbs[mark][number % verbs[mark].length];
-  const typeNote = subject.pattern.questionMarks.includes(mark)
-    ? "officially aligned marker"
-    : "adapted practice marker";
-
-  return {
-    number,
-    mark,
-    typeNote,
-    prompt: `${verb} "${topic}" with reference to ${chapter.title}.`,
-    meta: `${book.title} - ${chapter.unit}`,
-    subject,
-    book,
-    chapter,
-    topic,
-    answer: answerGuide(subject, chapter, topic, mark)
-  };
-}
-
-function answerGuide(subject, chapter, topic, mark) {
-  const lengthGuide = {
-    1: "one precise line",
-    2: "two points with one example if useful",
-    3: "definition, explanation, and example",
-    4: "four clear points with a link back to the chapter",
-    5: "introduction, three developed points, and a short conclusion",
-    6: "structured answer with context, analysis, examples, and conclusion"
-  };
-  return `Expected answer: cover ${topic} in ${lengthGuide[mark]}. Keep it within ${chapter.title}; use the syllabus terms and avoid adding material outside ${subject.name}.`;
-}
-
-async function enrichPaperAnswers(paper) {
-  const hasKey = Boolean(localStorage.getItem("boardbridge_api_key"));
-
-  if (hasKey) {
-    await Promise.all(paper.questions.map(async (q) => {
-      const context = `Subject: ${q.subject.name}\nBook: ${q.book.title}\nChapter: ${q.chapter.title}\nTopic: ${q.topic}\nMarks: ${q.mark}\nExam angle: ${q.chapter.boardMoves.join(", ")}`;
-      const prompt = `Write a model board-exam answer for this CBSE Class XII question (${q.mark} mark${q.mark > 1 ? "s" : ""}): "${q.prompt}"\n\nStructure the answer to score full marks. Use precise syllabus terms.`;
-      const aiText = await callClaude(prompt, context);
-      if (aiText) {
-        const paragraphs = aiText.split(/\n\n+/).filter(Boolean);
-        const body = paragraphs.map((para) => {
-          if (para.match(/^[-•]\s/) || para.match(/^\d+\.\s/)) {
-            const items = para.split(/\n/).filter(Boolean);
-            return `<ol class="answer-list">${items.map((i) => `<li>${escapeHtml(i.replace(/^[-•\d.]+\s*/, ""))}</li>`).join("")}</ol>`;
-          }
-          return `<p>${escapeHtml(para)}</p>`;
-        }).join("");
-        q.answerHtml = `<div class="score-answer"><h4>Model Answer (AI)</h4>${body}</div>`;
-      } else {
-        q.answerHtml = buildScoreAnswerHtml(q, null);
-      }
-    }));
-    return;
-  }
-
-  const chapterGroups = new Map();
-  paper.questions.forEach((q) => { if (!chapterGroups.has(q.chapter.id)) chapterGroups.set(q.chapter.id, q); });
-  const samples = [...chapterGroups.values()].slice(0, 5);
-  const fetched = await Promise.all(samples.map((q) =>
-    fetchSourceBundle({ subject: paper.subject, chapter: q.chapter, topic: q.topic, question: q.prompt })
-      .then((bundle) => [q.chapter.id, bundle])
-  ));
-  const bundles = new Map(fetched);
-  const fallback = fetched[0]?.[1] || null;
-  paper.questions.forEach((q) => {
-    q.answerHtml = buildScoreAnswerHtml(q, bundles.get(q.chapter.id) || fallback);
-  });
-}
-
-function buildScoreAnswerHtml(question, bundle) {
-  const direct = directAnswerLine(question);
-  const points = examPoints(question, bundle);
-  const conclusion = conclusionLine(question);
-  return `
-    <div class="score-answer">
-      <h4>Write This In The Exam</h4>
-      <p><strong>Direct answer:</strong> ${escapeHtml(direct)}</p>
-      <ol class="answer-list">
-        ${points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
-      </ol>
-      ${question.mark >= 4 ? `<p><strong>Conclusion:</strong> ${escapeHtml(conclusion)}</p>` : ""}
-      ${bundle?.snippets?.length ? `
-        <div>
-          <h4>Source-backed hints</h4>
-          <ul class="topic-list">${bundle.snippets.slice(0, 2).map((snippet) => `<li>${escapeHtml(snippet)}</li>`).join("")}</ul>
-        </div>
-      ` : ""}
-      ${sourcesHtml(bundle)}
-    </div>
-  `;
-}
-
-function directAnswerLine(question) {
-  const subjectId = question.subject?.id || selectedSubject().id;
-  const starters = {
-    "legal-studies": `${question.topic} is a legal concept or process under ${question.chapter.title} that must be defined and applied to the given facts.`,
-    psychology: `${question.topic} refers to a psychological concept in ${question.chapter.title} that explains behaviour, mental process, assessment, or adjustment.`,
-    economics: `${question.topic} is an economic concept in ${question.chapter.title} used to explain a variable, relationship, policy effect, or calculation.`,
-    "political-science": `${question.topic} is part of the political development or institution studied in ${question.chapter.title}.`,
-    "english-core": `${question.topic} should be answered through the text, its theme, tone, character situation, and relevant inference.`,
-    "commercial-art": `${question.topic} should be explained through visual features, style, composition, or practical design requirements.`
-  };
-  return starters[subjectId] || `${question.topic} belongs to ${question.chapter.title} and should be explained with syllabus-specific terms.`;
-}
-
-function examPoints(question, bundle) {
-  const base = [
-    `Begin by defining "${question.topic}" in relation to "${question.chapter.title}".`,
-    `Use the key syllabus connection: ${question.chapter.boardMoves[0] || question.chapter.topics[0]}.`,
-    `Add one example, effect, comparison, or application from the chapter.`,
-    `Use exact terms from the question and avoid unrelated outside material.`,
-    `For higher marks, organise the answer into short paragraphs or numbered points.`,
-    `End by showing why the concept matters in the chapter or exam situation.`
-  ];
-
-  if (bundle?.snippets?.length) {
-    base.splice(2, 0, `Include this source-backed clue if relevant: ${bundle.snippets[0]}`);
-  }
-
-  const pointTarget = Math.max(1, Math.min(6, question.mark));
-  return base.slice(0, pointTarget);
-}
-
-function conclusionLine(question) {
-  return `Thus, ${question.topic} should not be written as an isolated term; it should be connected to ${question.chapter.title} and used to answer the exact demand of the question.`;
-}
-
-function renderPaperPreview(paper) {
-  return `
-    <article class="printable">
-      <div class="paper-header">
-        <h3>${escapeHtml(paper.subject.name)} Practice Paper</h3>
-        <p>Class XII CBSE ${escapeHtml(DATA.examWindow)} - Time: ${paper.duration / 60} hour${paper.duration > 60 ? "s" : ""} - Marks: ${paper.total}</p>
-        <p class="small-note">Generated ${escapeHtml(paper.generatedAt)}. Pattern basis: ${escapeHtml(paper.subject.pattern.basis)}</p>
-      </div>
-      <ol class="paper-questions">
-        ${paper.questions.map((question) => `
-          <li class="question-card">
-            <div class="question-meta">${escapeHtml(question.meta)} - ${question.mark} mark${question.mark > 1 ? "s" : ""} - ${escapeHtml(question.typeNote)}</div>
-            <strong>${escapeHtml(question.prompt)}</strong>
-            ${paper.showAnswers ? `<div class="answer-box is-visible">${question.answerHtml || escapeHtml(question.answer)}</div>` : ""}
-          </li>
-        `).join("")}
-      </ol>
-    </article>
-  `;
-}
-
-function renderAssistant() {
-  const hasKey = Boolean(localStorage.getItem("boardbridge_api_key"));
-  const badgeHtml = hasKey
-    ? `<span class="ai-badge">AI ON</span>`
-    : `<span class="ai-badge ai-off">AI OFF</span>`;
-
-  els.panels.assistant.innerHTML = `
-    <div class="assistant-layout">
-      <div class="tool-card">
-        <h3>Study Assistant ${badgeHtml}</h3>
-        <div class="assistant-input">
-          <textarea id="assistant-question" placeholder="Ask anything from the syllabus, books, or exam pattern…"></textarea>
-          <button class="primary-button" id="ask-assistant">Ask</button>
-        </div>
-        <p class="small-note">${hasKey
-          ? "AI is active — answers use Claude with CBSE syllabus context and web sources."
-          : "Using built-in syllabus logic. Add your Anthropic API key in ⚙ Settings for live AI answers."}</p>
-      </div>
-      <div class="assistant-results" id="assistant-results">
-        <div class="guardrail">
-          <strong>Knowledge boundary</strong>
-          <p>Questions outside CBSE Class XII subjects, official syllabus, exam patterns, or generated papers are refused — not guessed.</p>
-        </div>
-      </div>
-    </div>
-  `;
-
-  const textarea = els.panels.assistant.querySelector("#assistant-question");
-  textarea.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-      els.panels.assistant.querySelector("#ask-assistant").click();
-    }
-  });
-
-  els.panels.assistant.querySelector("#ask-assistant").addEventListener("click", async () => {
-    const question = textarea.value.trim();
-    if (!question) return;
-    const results = els.panels.assistant.querySelector("#assistant-results");
-    results.innerHTML = `<div class="empty-state"><h3>Thinking…</h3><p>Checking syllabus and sources for this topic.</p></div>`;
-    const result = await answerFromKnowledgeBase(question);
-    results.innerHTML = result;
-  });
-}
-
-async function answerFromKnowledgeBase(question) {
-  if (!question) {
-    return `<div class="empty-state"><h3>Ask a syllabus question</h3><p>Try a chapter, concept, or paper question number.</p></div>`;
-  }
-
-  const paperAnswer = await answerFromCurrentPaper(question);
-  if (paperAnswer) return paperAnswer;
-
-  const tokens = tokenize(question);
-  const matches = allChapters()
-    .map((item) => ({ ...item, score: scoreChapter(item, tokens) }))
-    .filter((item) => item.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 3);
-
-  const hasKey = Boolean(localStorage.getItem("boardbridge_api_key"));
-
-  if (!matches.length && !hasKey) {
-    return `
-      <div class="guardrail">
-        <strong>Topic not found in syllabus map.</strong>
-        <p>Try naming a chapter or topic such as "Money and Banking", "ADR", "Aunt Jennifer's Tigers", or "attitude formation". Add an Anthropic API key in ⚙ Settings for broader answers.</p>
-      </div>
-    `;
-  }
-
-  const best = matches[0] || null;
-  const topicHits = best
-    ? best.chapter.topics.filter((t) => tokens.some((tok) => t.toLowerCase().includes(tok))).slice(0, 4)
-    : [];
-  const topics = topicHits.length && best ? topicHits : (best ? best.chapter.topics.slice(0, 4) : []);
-
-  if (hasKey) {
-    const context = best
-      ? `Subject: ${best.subject.name}\nBook: ${best.book.title}\nChapter: ${best.chapter.title}\nKey topics: ${best.chapter.topics.join(", ")}\nExam angle: ${best.chapter.boardMoves.join(", ")}`
-      : "General CBSE Class XII query.";
-    const aiText = await callClaude(question, context);
-    if (aiText) {
-      const paragraphs = aiText.split(/\n\n+/).filter(Boolean);
-      const bodyHtml = paragraphs.map((para) => {
-        if (para.startsWith("- ") || para.match(/^\d+\./)) {
-          const items = para.split(/\n/).filter(Boolean);
-          return `<ul class="topic-list">${items.map((item) => `<li>${escapeHtml(item.replace(/^[-\d.]+\s*/, ""))}</li>`).join("")}</ul>`;
-        }
-        return `<p>${escapeHtml(para)}</p>`;
-      }).join("");
-      return `
-        <div class="assistant-answer">
-          ${best ? `<div><p class="eyebrow">${escapeHtml(best.subject.name)} · ${escapeHtml(best.book.title)}</p><h3>${escapeHtml(best.chapter.title)}</h3></div>` : ""}
-          <div class="tool-card" style="margin:0">${bodyHtml}</div>
-          ${best ? `<div><h4>Exam angle</h4><p>${escapeHtml(best.chapter.boardMoves.join(" · "))}</p></div>` : ""}
-        </div>
-      `;
-    }
-  }
-
-  if (!best) {
-    return `<div class="guardrail"><strong>Topic not found in syllabus map.</strong><p>Try a chapter name, concept, or topic from your books.</p></div>`;
-  }
-
-  const bundle = await fetchSourceBundle({ subject: best.subject, chapter: best.chapter, topic: topics[0], question });
-  return `
-    <div class="assistant-answer">
-      <div>
-        <p class="eyebrow">${escapeHtml(best.subject.name)} - ${escapeHtml(best.book.title)}</p>
-        <h3>${escapeHtml(best.chapter.title)}</h3>
-        <p>${escapeHtml(best.chapter.hook)}</p>
-      </div>
-      <div>
-        <h4>Study-safe answer</h4>
-        <p>${escapeHtml(buildAssistantExplanation(best.subject, best.chapter, topics))}</p>
-      </div>
-      ${bundle.snippets.length ? `<div><h4>Source Notes</h4><ul class="topic-list">${bundle.snippets.slice(0, 3).map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ul></div>` : ""}
-      <div><h4>Key syllabus points</h4><ul class="topic-list">${topics.map((t) => `<li>${escapeHtml(t)}</li>`).join("")}</ul></div>
-      <div><h4>Exam angle</h4><p>${escapeHtml(best.chapter.boardMoves.join(", "))}</p></div>
-      ${sourcesHtml(bundle)}
-    </div>
-  `;
-}
-
-async function answerFromCurrentPaper(question) {
-  if (!state.paper) return null;
-  const match = question.match(/(?:q|question)\s*\.?\s*(\d+)/i);
-  if (!match) return null;
-  const number = Number(match[1]);
-  const found = state.paper.questions.find((item) => item.number === number);
-  if (!found) return null;
-  if (!found.answerHtml) {
-    const bundle = await fetchSourceBundle({
-      subject: state.paper.subject,
-      chapter: found.chapter,
-      topic: found.topic,
-      question: found.prompt
-    });
-    found.answerHtml = buildScoreAnswerHtml(found, bundle);
-  }
-  return `
-    <div class="assistant-answer">
-      <h3>Answer for Question ${found.number}</h3>
-      <p><strong>${escapeHtml(found.prompt)}</strong></p>
-      ${found.answerHtml}
-    </div>
-  `;
-}
-
-function buildAssistantExplanation(subject, chapter, topics) {
-  const opener = `Within the loaded syllabus, ${chapter.title} should be answered through ${topics.join(", ")}.`;
-  const method = conceptExplanation(subject, chapter, topics[0]);
-  return `${opener} ${method} For a board-style response, keep the answer anchored to these terms and add a concise example only when it comes from the chapter context.`;
-}
-
-async function fetchSourceBundle({ subject, chapter, topic, question, mode = "topic" }) {
-  const query = [
-    "CBSE Class XII",
-    subject.name,
-    chapter?.title,
-    topic,
-    mode === "pattern" ? "exam pattern sample paper marking scheme" : "NCERT textbook explanation"
-  ]
-    .filter(Boolean)
-    .join(" ");
-  const cacheKey = `${mode}:${subject.id}:${chapter?.id || "pattern"}:${topic || question || ""}`.toLowerCase();
-  if (state.sourceCache.has(cacheKey)) return state.sourceCache.get(cacheKey);
-
-  const targets = sourceTargets(subject);
-  const bundle = {
-    status: "ready",
-    query,
-    sources: [],
-    snippets: [],
-    warnings: []
-  };
-
-  if (SOURCE_CONFIG.proxyUrl) {
-    try {
-      const proxied = await fetchViaProxy({ subject, chapter, topic, question, query, targets });
-      state.sourceCache.set(cacheKey, proxied);
-      return proxied;
-    } catch (error) {
-      bundle.warnings.push(`Configured source proxy failed: ${error.message}`);
-    }
-  }
-
-  const readAttempts = await Promise.allSettled(targets.slice(0, 3).map((target) => fetchReadableTarget(target, query)));
-  readAttempts.forEach((result) => {
-    if (result.status === "fulfilled" && result.value) {
-      bundle.sources.push(result.value.source);
-      bundle.snippets.push(...result.value.snippets);
-    }
-  });
-
-  if (SOURCE_CONFIG.publicSearch) {
-    try {
-      const webResults = await fetchSearchResults(query);
-      bundle.sources.push(...webResults.sources);
-      bundle.snippets.push(...webResults.snippets);
-    } catch (error) {
-      bundle.warnings.push(`Live web search was not available from this browser: ${error.message}`);
-    }
-  }
-
-  if (!bundle.sources.length) {
-    bundle.status = "limited";
-    bundle.sources = targets;
-    bundle.warnings.push("Live source text could not be fetched. Showing official source links instead.");
-  }
-
-  bundle.sources = uniqueSources(bundle.sources).slice(0, 6);
-  bundle.snippets = uniqueSnippets(bundle.snippets).slice(0, 5);
-  state.sourceCache.set(cacheKey, bundle);
-  return bundle;
-}
-
-async function fetchViaProxy(payload) {
-  const response = await fetchWithTimeout(SOURCE_CONFIG.proxyUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  }, 14000);
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const data = await response.json();
-  return {
-    status: "ready",
-    query: payload.query,
-    sources: uniqueSources(data.sources || []),
-    snippets: uniqueSnippets(data.snippets || []),
-    warnings: data.warnings || []
-  };
-}
-
-async function fetchReadableTarget(target, query) {
-  const response = await fetchWithTimeout(`${SOURCE_CONFIG.readerBase}${target.url}`, {
-    headers: { Accept: "text/plain" }
-  }, 14000);
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const text = await response.text();
-  const snippets = extractRelevantSnippets(text, query);
-  return {
-    source: {
-      title: target.title,
-      type: target.type,
-      url: target.url,
-      readerUrl: `${SOURCE_CONFIG.readerBase}${target.url}`
-    },
-    snippets
-  };
-}
-
-async function fetchSearchResults(query) {
-  const response = await fetchWithTimeout(`${SOURCE_CONFIG.searchBase}${encodeURIComponent(query)}`, {
-    headers: { Accept: "text/plain" }
-  }, 10000);
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const text = await response.text();
-  return {
-    sources: parseSearchSources(text),
-    snippets: extractRelevantSnippets(text, query)
-  };
-}
-
-async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...options, signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-function sourceTargets(subject) {
-  return [
-    {
-      title: `${subject.name} CBSE 2026-27 curriculum`,
-      type: "Official CBSE curriculum",
-      url: subject.officialUrl
-    },
-    {
-      title: `${subject.name} latest CBSE sample paper`,
-      type: "Official CBSE sample paper",
-      url: subject.samplePaperUrl
-    },
-    ...DATA.sources.map((source) => ({
-      title: source.title,
-      type: source.type,
-      url: source.url
-    }))
-  ];
-}
-
-function extractRelevantSnippets(text, query) {
-  const tokens = tokenize(query).filter((token) => token.length > 3);
-  const lines = text
-    .replace(/\r/g, "\n")
-    .split(/\n+/)
-    .map((line) => line.replace(/\s+/g, " ").trim())
-    .filter((line) => line.length > 55 && line.length < 320);
-  const scored = lines
-    .map((line) => ({
-      text: line,
-      score: tokens.reduce((sum, token) => sum + (line.toLowerCase().includes(token) ? 1 : 0), 0)
-    }))
-    .filter((item) => item.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5)
-    .map((item) => item.text);
-  return scored.length ? scored : lines.slice(0, 3);
-}
-
-function parseSearchSources(text) {
-  const matches = [...text.matchAll(/\[(.+?)\]\((https?:\/\/[^)]+)\)/g)];
-  return matches.slice(0, 5).map((match) => ({
-    title: match[1].replace(/\s+/g, " ").trim(),
-    type: "Live web result",
-    url: match[2]
-  }));
-}
-
-function uniqueSources(sources) {
-  const seen = new Set();
-  return sources.filter((source) => {
-    if (!source?.url || seen.has(source.url)) return false;
-    seen.add(source.url);
-    return true;
-  });
-}
-
-function uniqueSnippets(snippets) {
-  const seen = new Set();
-  return snippets.filter((snippet) => {
-    const key = snippet.toLowerCase().slice(0, 90);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
-function sourcesHtml(bundle) {
-  if (!bundle) return "";
-  return `
-    <div class="source-strip">
-      <strong>Sources checked</strong>
-      <ul class="source-list">
-        ${bundle.sources.slice(0, 4).map((source) => `<li><a href="${escapeAttribute(source.url)}" target="_blank" rel="noreferrer">${escapeHtml(source.title)}</a> <span class="chapter-meta">${escapeHtml(source.type || "Source")}</span></li>`).join("")}
-      </ul>
-      ${bundle.warnings.length ? `<p class="small-note">${escapeHtml(bundle.warnings.join(" "))}</p>` : ""}
-    </div>
-  `;
-}
-
-function renderSources() {
-  els.panels.sources.innerHTML = `
-    <div class="source-grid">
-      ${DATA.sources.map(sourceCard).join("")}
-      ${DATA.subjects.map((subject) => sourceCard({
-        title: `${subject.name} curriculum PDF`,
-        type: `Subject code ${subject.code}`,
-        url: subject.officialUrl,
-        note: `${subject.theoryMarks} theory marks and ${subject.practicalMarks} internal/practical marks.`
-      })).join("")}
-      ${DATA.subjects.map((subject) => sourceCard({
-        title: `${subject.name} sample paper`,
-        type: "Latest public CBSE SQP reference",
-        url: subject.samplePaperUrl,
-        note: subject.pattern.basis
-      })).join("")}
-    </div>
-  `;
-}
-
-function sourceCard(source) {
-  return `
-    <article class="source-card">
-      <p class="eyebrow">${escapeHtml(source.type)}</p>
-      <h3>${escapeHtml(source.title)}</h3>
-      <p>${escapeHtml(source.note)}</p>
-      <a href="${escapeAttribute(source.url)}" target="_blank" rel="noreferrer">Open source</a>
-    </article>
-  `;
-}
-
-function selectedSubject() {
-  return DATA.subjects.find((subject) => subject.id === state.selectedSubjectId) || DATA.subjects[0];
-}
-
-function filteredChapters(subject) {
-  const chapters = flattenSubject(subject);
-  if (!state.query) return chapters;
-  return chapters.filter(({ subject: itemSubject, book, chapter }) => {
-    const haystack = [
-      itemSubject.name,
-      book.title,
-      chapter.title,
-      chapter.unit,
-      chapter.hook,
-      ...chapter.topics,
-      ...chapter.boardMoves
-    ]
-      .join(" ")
-      .toLowerCase();
-    return haystack.includes(state.query);
-  });
-}
-
-function flattenSubject(subject) {
-  return subject.books.flatMap((book) => book.chapters.map((chapter) => ({ subject, book, chapter })));
-}
-
-function allChapters() {
-  return DATA.subjects.flatMap((subject) => flattenSubject(subject));
-}
-
-function tokenize(value) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9\s'-]/g, " ")
-    .split(/\s+/)
-    .filter((token) => token.length > 2)
-    .filter((token) => !["what", "why", "how", "the", "and", "from", "chapter", "topic", "tell", "about"].includes(token));
-}
-
-function scoreChapter(item, tokens) {
-  const text = [
-    item.subject.name,
-    item.book.title,
-    item.chapter.title,
-    item.chapter.unit,
-    ...item.chapter.topics,
-    ...item.chapter.boardMoves
-  ]
-    .join(" ")
-    .toLowerCase();
-  return tokens.reduce((score, token) => score + (text.includes(token) ? 1 : 0), 0);
-}
-
-function wireAnswerToggles(root) {
-  root.querySelectorAll("[data-answer]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const box = root.querySelector(`#answer-${button.dataset.answer}`);
-      box.classList.toggle("is-visible");
-      button.textContent = box.classList.contains("is-visible") ? "Hide answer" : "Show answer";
-    });
-  });
-}
-
-function shuffle(items) {
-  const copy = [...items];
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
-  }
-  return copy;
-}
-
-function emptyState() {
-  const template = document.querySelector("#empty-state-template");
-  return template.innerHTML;
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function escapeAttribute(value) {
-  return escapeHtml(value).replaceAll("`", "&#096;");
-}
-
-async function callClaude(userMessage, context = "") {
-  const key = localStorage.getItem("boardbridge_api_key");
-  if (!key) return null;
-  const system = context ? `${CLAUDE_SYSTEM}\n\nCurrent context:\n${context}` : CLAUDE_SYSTEM;
-  try {
-    const response = await fetchWithTimeout(CLAUDE_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": key,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true"
-      },
-      body: JSON.stringify({
-        model: CLAUDE_MODEL,
-        max_tokens: 1024,
-        system,
-        messages: [{ role: "user", content: userMessage }]
-      })
-    }, 30000);
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.error?.message || `HTTP ${response.status}`);
-    }
-    const data = await response.json();
-    return data.content[0].text;
-  } catch (error) {
-    return null;
-  }
-}
-
-function downloadPdf() {
-  if (!state.paper || !window.jspdf) { window.print(); return; }
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
-  const margin = 18;
-  const pageW = doc.internal.pageSize.getWidth();
-  const maxW = pageW - margin * 2;
-  let y = margin;
-
-  function addText(text, { size = 11, bold = false, rgb = [23, 33, 31], indent = 0, gap = 3 } = {}) {
-    doc.setFontSize(size);
-    doc.setFont("helvetica", bold ? "bold" : "normal");
-    doc.setTextColor(...rgb);
-    const lines = doc.splitTextToSize(String(text), maxW - indent);
-    lines.forEach((line) => {
-      if (y > 272) { doc.addPage(); y = margin; }
-      doc.text(line, margin + indent, y);
-      y += size * 0.42;
-    });
-    y += gap;
-  }
-
-  const p = state.paper;
-  addText("BOARDBRIDGE  ·  CBSE CLASS XII", { size: 8, rgb: [102, 113, 109] });
-  y += 2;
-  addText(`${p.subject.name} Practice Paper`, { size: 16, bold: true, gap: 4 });
-  addText(`Time: ${p.duration / 60} hr${p.duration > 60 ? "s" : ""}   ·   Max Marks: ${p.total}   ·   ${DATA.examWindow}`, { size: 10, rgb: [102, 113, 109] });
-  addText(`Pattern: ${p.subject.pattern.basis}`, { size: 8, rgb: [150, 160, 155] });
-  y += 2;
-  doc.setDrawColor(210, 220, 215);
-  doc.line(margin, y, pageW - margin, y);
-  y += 6;
-
-  p.questions.forEach((q) => {
-    addText(`Q${q.number}.  [${q.mark} mark${q.mark > 1 ? "s" : ""}]  ${q.meta}`, { size: 8, rgb: [102, 113, 109], gap: 1 });
-    addText(q.prompt, { size: 11, bold: true, gap: 5 });
-    if (p.showAnswers) {
-      const raw = q.answerHtml
-        ? q.answerHtml.replace(/<[^>]+>/g, " ").replace(/\s{2,}/g, " ").trim()
-        : q.answer;
-      addText(raw, { size: 9, indent: 5, rgb: [32, 81, 75], gap: 5 });
-    }
-    y += 2;
-  });
-
-  doc.save(`BoardBridge_${p.subject.name.replace(/\s+/g, "_")}_Paper.pdf`);
-}
-
-function registerServiceWorker() {
-  if (!("serviceWorker" in navigator)) return;
-  navigator.serviceWorker.register("service-worker.js").catch(() => {});
-}
-
-init();
+document.addEventListener("DOMContentLoaded", init);

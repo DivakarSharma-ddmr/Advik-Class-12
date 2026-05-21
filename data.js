@@ -1,31 +1,11 @@
 window.CBSE_STUDY_DATA = {
-  updatedOn: "2026-05-20",
+  updatedOn: "2026-05-21",
   examWindow: "Feb-Mar 2027",
   sources: [
-    {
-      title: "CBSE Curriculum 2026-27",
-      type: "Official curriculum portal",
-      url: "https://cbseacademic.nic.in/curriculum_2027.html",
-      note: "Primary source for subject syllabus and prescribed books."
-    },
-    {
-      title: "CBSE circular Acad-14/2026",
-      type: "Official release circular",
-      url: "https://cbseacademic.nic.in/web_material/Circulars/2026/14_Circular_2026.pdf",
-      note: "Confirms release of the 2026-27 curriculum for Classes IX-XII."
-    },
-    {
-      title: "CBSE Class XII sample papers 2025-26",
-      type: "Official sample papers",
-      url: "https://cbseacademic.nic.in/SQP_CLASSXII_2025-26.html",
-      note: "Used as current public paper-format reference until 2026-27 sample papers are published."
-    },
-    {
-      title: "CBSE previous years question papers",
-      type: "Official question-paper archive",
-      url: "https://www.cbse.gov.in/cbsenew/question-paper.html",
-      note: "Archive for board-paper calibration, including recent Class XII examination papers."
-    }
+    { title: "CBSE Curriculum 2026-27", type: "Official curriculum", url: "https://cbseacademic.nic.in/curriculum_2027.html", note: "Primary source for syllabus and prescribed books." },
+    { title: "CBSE Sample Papers 2025-26", type: "Official SQP", url: "https://cbseacademic.nic.in/SQP_CLASSXII_2025-26.html", note: "Official sample papers used for pattern calibration." },
+    { title: "CBSE Previous Year Papers", type: "Question paper archive", url: "https://www.cbse.gov.in/cbsenew/question-paper.html", note: "Board exam papers from recent years." },
+    { title: "NCERT Textbooks", type: "Prescribed textbooks", url: "https://ncert.nic.in/textbook.php", note: "All NCERT textbooks for Class XII." }
   ],
   subjects: [
     {
@@ -33,649 +13,291 @@ window.CBSE_STUDY_DATA = {
       name: "Legal Studies",
       code: "074",
       icon: "LS",
+      color: "#0ea5e9",
+      colorSoft: "#e0f2fe",
       theoryMarks: 80,
       practicalMarks: 20,
       durationMinutes: 180,
       officialUrl: "https://cbseacademic.nic.in/web_material/CurriculumMain27/SecPart2/LegalStudies_SecP2_2026-27.pdf",
       samplePaperUrl: "https://cbseacademic.nic.in/web_material/SQP/ClassXII_2025_26/LegalStudies-SQP.pdf",
       pattern: {
-        basis: "CBSE 2026-27 curriculum plus the latest official Class XII Legal Studies sample paper available publicly for 2025-26.",
+        basis: "CBSE 2026-27 curriculum plus latest Legal Studies sample paper.",
         questionMarks: [1, 2, 3, 5],
-        requestedMarksSupported: [1, 2, 3, 4, 5, 6],
-        sections: [
-          "Section A: objective and MCQ style questions",
-          "Section B: 2-mark short answers",
-          "Section C: 3-mark short answers and case situations",
-          "Section D: 5-mark long answers"
-        ],
-        competencies: [
-          { name: "Legal recall and terms", weight: 30 },
-          { name: "Application to fact situations", weight: 40 },
-          { name: "Analysis of statutes, cases, and remedies", weight: 30 }
-        ]
+        sections: ["Section A: MCQ/objective (1 mark)", "Section B: Short answer (2 mark)", "Section C: Short answer with application (3 mark)", "Section D: Long answer (5 mark)"]
       },
-      books: [
-        {
-          id: "legal-xii",
-          title: "Legal Studies Class XII",
-          publisher: "CBSE revised textbook",
-          chapters: [
-            {
-              id: "legal-judiciary",
-              unit: "Unit 1",
-              title: "Judiciary",
-              marks: 8,
-              topics: [
-                "Structure, hierarchy of courts, and legal officers in India",
-                "Constitution, roles, and impartiality",
-                "Appointment, retirement, and removal of judges",
-                "Tribunals",
-                "Courts and judicial review"
-              ],
-              boardMoves: ["court hierarchy", "judicial independence", "collegium", "review power"],
-              hook: "Think of the judiciary as the scoreboard, referee, and rule interpreter in one institution."
-            },
-            {
-              id: "legal-adr",
-              unit: "Unit 2",
-              title: "Alternative Dispute Resolution in India",
-              marks: 8,
-              topics: [
-                "Adversarial and inquisitorial systems",
-                "Meaning and scope of ADR",
-                "Arbitration",
-                "Mediation",
-                "Conciliation",
-                "Lok Adalat",
-                "Ombudsman",
-                "Lokpal and Lokayukta"
-              ],
-              boardMoves: ["compare ADR methods", "Section 89 CPC", "speedy settlement", "institutional forums"],
-              hook: "ADR is the law's traffic-diversion plan: fewer jams, faster routes, but still rule-bound."
-            },
-            {
-              id: "legal-contract",
-              unit: "Unit 3A",
-              title: "Law of Contract",
-              marks: 5,
-              topics: [
-                "Introduction to contracts",
-                "Formation of contract",
-                "Intention to contract",
-                "Consideration",
-                "Capacity to contract",
-                "Consent",
-                "Types of contracts",
-                "Discharge of contract",
-                "Remedies in case of breach"
-              ],
-              boardMoves: ["valid contract essentials", "minor's agreement", "free consent", "breach remedies"],
-              hook: "A contract is a promise wearing formal shoes: offer, acceptance, consideration, capacity, and consent."
-            },
-            {
-              id: "legal-torts",
-              unit: "Unit 3B",
-              title: "Law of Torts",
-              marks: 5,
-              topics: [
-                "Concept of law of torts",
-                "Sources of law of torts",
-                "Intentional tort",
-                "Defamation",
-                "Negligence",
-                "Strict liability",
-                "Absolute liability"
-              ],
-              boardMoves: ["civil wrong", "duty and breach", "defamation elements", "liability standards"],
-              hook: "Tort law asks a simple question with serious consequences: who caused harm and who must repair it?"
-            },
-            {
-              id: "legal-property",
-              unit: "Unit 3C",
-              title: "Law of Property",
-              marks: 5,
-              topics: [
-                "Types of property",
-                "Who can transfer property",
-                "Essentials of a valid transfer",
-                "Sale",
-                "Lease",
-                "Exchange",
-                "Gift"
-              ],
-              boardMoves: ["transfer types", "valid transfer", "mutation", "sale versus lease"],
-              hook: "Property law is the handover protocol: what is being moved, who can move it, and how the law records it."
-            },
-            {
-              id: "legal-ipr",
-              unit: "Unit 3D",
-              title: "Intellectual Property Law",
-              marks: 5,
-              topics: [
-                "Meaning of intellectual property",
-                "International obligations shaping Indian IPR",
-                "WIPO",
-                "Copyright",
-                "Patent",
-                "Trademark",
-                "Geographical indication",
-                "Design"
-              ],
-              boardMoves: ["match IPR types", "moral rights", "GI examples", "patent versus trade secret"],
-              hook: "IPR protects ideas once they step into the world as art, inventions, brands, designs, or place-linked products."
-            },
-            {
-              id: "legal-sustainable-development",
-              unit: "Unit 4A",
-              title: "Law and Sustainable Development",
-              marks: 4,
-              topics: [
-                "Introduction",
-                "International initiatives",
-                "Indian constitutional provisions",
-                "Environment Protection Act, 1986",
-                "Pollution Control Boards"
-              ],
-              boardMoves: ["Article 48A", "environmental statutes", "public interest", "pollution control"],
-              hook: "This chapter is where law stops being paperwork and starts breathing clean air."
-            },
-            {
-              id: "legal-entities",
-              unit: "Unit 4B",
-              title: "Forms of Legal Entities",
-              marks: 3,
-              topics: [
-                "Sole proprietorship",
-                "Partnership",
-                "Limited liability partnership",
-                "Private limited company",
-                "Public limited company",
-                "One person company"
-              ],
-              boardMoves: ["entity comparison", "liability", "ownership", "business suitability"],
-              hook: "Choosing a legal entity is like choosing a vehicle: cycle, car, bus, or train depending on risk and scale."
-            },
-            {
-              id: "legal-criminal-law",
-              unit: "Unit 4C",
-              title: "Criminal Laws in India",
-              marks: 3,
-              topics: [
-                "Objectives of criminal law",
-                "Legislations for criminal laws in India",
-                "Distinction between intention and motive",
-                "Stages of crime",
-                "The Indian Evidence Act",
-                "Admission and confession"
-              ],
-              boardMoves: ["stages of crime", "intention versus motive", "evidence", "confession"],
-              hook: "Criminal law follows the trail from thought to preparation to attempt to commission."
-            },
-            {
-              id: "legal-human-rights-india",
-              unit: "Unit 5A",
-              title: "Human Rights in India",
-              marks: 5,
-              topics: [
-                "Historical context",
-                "Preamble",
-                "Fundamental Rights",
-                "Directive Principles",
-                "Fundamental Duties"
-              ],
-              boardMoves: ["constitutional framework", "rights and duties", "DPSP links", "case-based application"],
-              hook: "Human rights are the Constitution's promise that power must remember the person."
-            },
-            {
-              id: "legal-human-rights-commissions",
-              unit: "Unit 5B",
-              title: "Human Rights Violations and Complaint Mechanisms",
-              marks: 5,
-              topics: [
-                "Quasi-judicial bodies",
-                "National Human Rights Commission",
-                "National Commission for Minorities",
-                "National Commission for Women",
-                "National Commission for Scheduled Castes and Scheduled Tribes",
-                "National Commission for Protection of Child Rights"
-              ],
-              boardMoves: ["forum identification", "powers of commissions", "complaint route", "rights violation facts"],
-              hook: "Complaint bodies are the help desks of constitutional protection: not courts, but not toothless either."
-            },
-            {
-              id: "legal-international-law",
-              unit: "Unit 6",
-              title: "International Law",
-              marks: 8,
-              topics: [
-                "Introduction",
-                "Historical evolution of international law",
-                "Meaning of international law",
-                "Sources of international law",
-                "International human rights",
-                "International law and municipal law",
-                "International law and India",
-                "Dispute resolution"
-              ],
-              boardMoves: ["sources", "customary law", "ICJ", "municipal law relation"],
-              hook: "International law is the rulebook countries use when there is no world police station."
-            },
-            {
-              id: "legal-profession",
-              unit: "Unit 7",
-              title: "Legal Profession in India",
-              marks: 8,
-              topics: [
-                "The Advocates Act, 1961",
-                "Lawyers and professional ethics",
-                "Advertising by lawyers",
-                "Liberalization and globalization of legal profession",
-                "Women and legal profession",
-                "Legal education in India, USA, and UK",
-                "Opportunities for law graduates"
-              ],
-              boardMoves: ["advocate roles", "professional ethics", "women in law", "legal education"],
-              hook: "This is the chapter where law becomes a career, a duty, and a public trust."
-            },
-            {
-              id: "legal-services",
-              unit: "Unit 8",
-              title: "Legal Services",
-              marks: 8,
-              topics: [
-                "Brief history of legal services",
-                "Free legal aid under criminal law",
-                "Legal aid by the State",
-                "Legal aid under the Indian Constitution",
-                "National Legal Services Authority",
-                "Legal Services Authorities Act, 1987",
-                "Legal aid in social justice and human rights"
-              ],
-              boardMoves: ["free legal aid", "NALSA", "access to justice", "poverty and legal rights"],
-              hook: "Legal aid is the bridge between having a right and actually being able to use it."
-            }
-          ]
-        }
-      ]
+      books: [{
+        id: "legal-xii",
+        title: "Legal Studies Class XII",
+        publisher: "CBSE",
+        chapters: [
+          {
+            id: "legal-judiciary",
+            unit: "Unit 1", title: "Judiciary", marks: 8,
+            hook: "Think of the judiciary as the scorecard, referee, and rule-interpreter — all in one institution.",
+            topics: ["Structure and hierarchy of courts", "Constitutional provisions for the judiciary", "Appointment and removal of judges", "Judicial independence and impartiality", "Tribunals and judicial review"],
+            boardMoves: ["court hierarchy diagram", "judicial independence reasons", "collegium system", "judicial review scope"],
+            pastYearQs: [
+              { year: 2024, marks: 1, q: "Name the court at the apex of the Indian judicial system.", a: "The Supreme Court of India is at the apex of the judicial system, established under Article 124 of the Constitution." },
+              { year: 2023, marks: 3, q: "What is meant by 'Judicial Independence'? State any three ways it is maintained in India.", a: "Judicial Independence means the judiciary functions free from interference by the executive or legislature, ensuring impartial justice.\n\nWays it is maintained:\n1. Security of tenure: Judges of Supreme Court and High Courts can only be removed through impeachment, not at the will of the executive.\n2. Fixed service conditions: Salaries and allowances of judges are charged to the Consolidated Fund of India and cannot be reduced during their tenure.\n3. Prohibition after retirement: Judges of the Supreme Court cannot practise in any court in India after retirement, preventing executive influence.\n4. Power of contempt: Courts can punish those who interfere with judicial proceedings." },
+              { year: 2023, marks: 2, q: "Distinguish between Original Jurisdiction and Appellate Jurisdiction of the Supreme Court.", a: "Original Jurisdiction means the Supreme Court alone can hear certain cases in the first instance — such as disputes between two or more states, or between a state and the Union. No lower court has heard these cases before.\n\nAppellate Jurisdiction means the Supreme Court hears appeals against judgments of High Courts and other courts when a substantial question of law is involved, or when the High Court certifies the case is fit for appeal." },
+              { year: 2022, marks: 3, q: "Explain the concept of Judicial Review with two examples.", a: "Judicial Review is the power of the Supreme Court and High Courts to examine the constitutional validity of any law passed by the legislature or action taken by the executive. If a law violates the Constitution, the court can declare it null and void.\n\nExamples:\n1. In Kesavananda Bharati v. State of Kerala (1973), the Supreme Court held that Parliament cannot amend the 'basic structure' of the Constitution, limiting Parliament's amending power.\n2. In Maneka Gandhi v. Union of India (1978), the court expanded the meaning of 'personal liberty' under Article 21, striking down an arbitrary government action.\n\nJudicial Review protects Fundamental Rights and upholds the supremacy of the Constitution." },
+              { year: 2024, marks: 5, q: "Explain the structure and jurisdiction of the Supreme Court of India.", a: "Structure: The Supreme Court consists of the Chief Justice of India and up to 33 other judges, appointed by the President on the recommendation of the collegium (senior judges). It sits in New Delhi.\n\nJurisdictions:\n1. Original Jurisdiction (Article 131): Hears disputes between the Centre and one or more states, or between two or more states.\n2. Writ Jurisdiction (Article 32): Citizens can directly approach the Supreme Court for enforcement of Fundamental Rights through writs — habeas corpus, mandamus, prohibition, certiorari, and quo warranto.\n3. Appellate Jurisdiction (Articles 132-136): Hears appeals from High Courts in constitutional, civil, and criminal matters. Special Leave Petition (Article 136) allows appeal from any court.\n4. Advisory Jurisdiction (Article 143): The President can seek the opinion of the Supreme Court on questions of law or fact of public importance.\n5. Review Jurisdiction: The court can review its own judgments under Article 137." }
+            ]
+          },
+          {
+            id: "legal-adr",
+            unit: "Unit 2", title: "Alternative Dispute Resolution in India", marks: 8,
+            hook: "ADR is the law's traffic-diversion plan — fewer jams, faster routes, but still rule-bound.",
+            topics: ["Adversarial vs inquisitorial systems", "Meaning and scope of ADR", "Arbitration", "Mediation", "Conciliation", "Lok Adalat", "Ombudsman", "Lokpal and Lokayukta"],
+            boardMoves: ["compare ADR methods", "Section 89 CPC", "Lok Adalat features", "Lokpal powers"],
+            pastYearQs: [
+              { year: 2024, marks: 3, q: "Distinguish between Mediation and Conciliation as methods of ADR.", a: "Mediation: A neutral third party (mediator) facilitates discussion between the parties to help them reach a mutually acceptable solution. The mediator does not impose a decision — the parties themselves arrive at a settlement. The mediator may suggest options but has no decision-making power.\n\nConciliation: A conciliator actively assists the parties by proposing terms of settlement and suggesting compromises. Unlike a mediator, the conciliator takes a more proactive role in drafting the agreement. Under the Arbitration and Conciliation Act, 1996, a conciliation settlement agreement is final and binding.\n\nKey Difference: The mediator facilitates; the conciliator actively proposes solutions." },
+              { year: 2023, marks: 2, q: "What is Lok Adalat? State any two features.", a: "Lok Adalat is a forum where disputes pending before courts or at the pre-litigation stage are settled through compromise. It was given statutory status under the Legal Services Authorities Act, 1987.\n\nFeatures:\n1. Award is final and binding: The award of a Lok Adalat is deemed a decree of a civil court and is not appealable in any court.\n2. No court fee: If a matter is settled in Lok Adalat, the court fee originally paid is refunded to the parties, making it cost-free for litigants." },
+              { year: 2022, marks: 5, q: "Explain Arbitration as a method of ADR. What are its advantages over court litigation?", a: "Arbitration is a process in which parties to a dispute refer it to one or more arbitrators whose decision (called an 'award') is binding on the parties. It is governed by the Arbitration and Conciliation Act, 1996.\n\nProcess:\n1. The parties agree to arbitrate (through an arbitration clause in a contract or a separate agreement).\n2. They appoint a sole arbitrator or a panel of arbitrators.\n3. The arbitrator hears both sides, examines evidence, and gives an award.\n4. The award is final, binding, and enforceable as a court decree.\n\nAdvantages over court litigation:\n1. Speed: Arbitration is much faster than court trials, which may take years.\n2. Confidentiality: Proceedings are private, unlike open court hearings.\n3. Expert arbitrators: Parties can choose arbitrators with expertise in the relevant field (e.g., a construction engineer for a building dispute).\n4. Flexible procedure: Parties can agree on rules, language, and venue.\n5. Finality: The award is generally final and not subject to lengthy appeals." },
+              { year: 2024, marks: 3, q: "What is the role of Ombudsman in grievance redressal?", a: "An Ombudsman is an official appointed to receive and investigate complaints from citizens against administrative actions or decisions of public authorities.\n\nRole:\n1. Investigates complaints: The Ombudsman examines complaints of maladministration, injustice, or negligence by government departments or public bodies.\n2. Recommends remedies: After investigation, the Ombudsman recommends corrective action — such as compensation or reversal of a decision. The recommendations are usually non-binding but carry strong persuasive authority.\n3. Promotes accountability: By independently reviewing government actions, the Ombudsman promotes transparency and accountability.\n\nExamples: Banking Ombudsman (complaints against banks), Insurance Ombudsman (complaints against insurers), and Lokpal at the national level serve similar functions." }
+            ]
+          },
+          {
+            id: "legal-contract",
+            unit: "Unit 3A", title: "Law of Contract", marks: 5,
+            hook: "A contract is a promise wearing formal shoes: offer, acceptance, consideration, capacity, and consent.",
+            topics: ["Formation of contract", "Intention to contract", "Consideration", "Capacity to contract", "Free consent", "Types of contracts", "Discharge of contract", "Remedies for breach"],
+            boardMoves: ["essential elements", "minor's agreement is void", "free consent vitiating factors", "breach remedies"],
+            pastYearQs: [
+              { year: 2023, marks: 3, q: "What is a valid contract? State its essential elements.", a: "A valid contract is an agreement enforceable by law. Under the Indian Contract Act, 1872 (Section 10), all agreements are contracts if made by free consent of parties competent to contract, for a lawful consideration and a lawful object.\n\nEssential elements:\n1. Offer and Acceptance: A clear proposal by one party and its unconditional acceptance by the other.\n2. Intention to create legal relations: Parties must intend to be legally bound.\n3. Lawful Consideration: Something of value must be exchanged (money, services, goods).\n4. Capacity: Parties must be major (18+), of sound mind, and not disqualified by law.\n5. Free Consent: Consent must be free from coercion, undue influence, fraud, misrepresentation, or mistake.\n6. Lawful Object: The purpose of the contract must not be illegal, immoral, or against public policy.\n7. Not expressly declared void: The agreement must not fall under categories declared void by the Act." },
+              { year: 2022, marks: 2, q: "What is 'free consent'? Give two examples of when consent is not free.", a: "Free Consent (Section 14): Consent is said to be free when it is not caused by coercion, undue influence, fraud, misrepresentation, or mistake.\n\nExamples of consent not being free:\n1. Coercion: A person signs a contract under threat of physical harm. Since consent was obtained by force, it is not free and the contract is voidable.\n2. Fraud: A seller deliberately conceals a major defect in a car and the buyer signs the contract unaware of it. The buyer's consent was obtained by fraud — the contract is voidable at the buyer's option." },
+              { year: 2024, marks: 3, q: "Explain any three remedies available in case of breach of contract.", a: "When a party fails to perform their contractual obligations, the aggrieved party has the following remedies:\n\n1. Suit for Damages: The most common remedy. The court awards monetary compensation to put the aggrieved party in the position they would have been in had the contract been performed. Damages include ordinary damages (naturally arising from breach) and special damages (if the breaching party knew of special circumstances).\n\n2. Suit for Specific Performance: The court orders the defaulting party to perform their promise exactly as agreed. This is granted when monetary compensation is inadequate — for example, in contracts involving unique property or rare goods.\n\n3. Suit for Injunction: The court restrains the breaching party from doing something promised not to be done. For example, if a singer contracted to perform exclusively for one company then joins a rival, the court can injunct them from performing for the rival." }
+            ]
+          },
+          {
+            id: "legal-torts",
+            unit: "Unit 3B", title: "Law of Torts", marks: 5,
+            hook: "Tort law asks a simple question with serious consequences: who caused harm and who must repair it?",
+            topics: ["Concept of tort", "Intentional tort", "Defamation", "Negligence", "Strict liability", "Absolute liability"],
+            boardMoves: ["civil vs criminal wrong", "duty-breach-damage", "Rylands v Fletcher", "M.C. Mehta case"],
+            pastYearQs: [
+              { year: 2023, marks: 3, q: "Distinguish between 'Strict Liability' and 'Absolute Liability'.", a: "Strict Liability (Rylands v Fletcher, 1868): If a person brings onto their land something likely to do mischief if it escapes, they are liable for all direct damage caused, even without negligence. However, exceptions exist — act of God, act of a stranger, plaintiff's own fault, or consent of the plaintiff.\n\nAbsolute Liability (M.C. Mehta v Union of India, 1987): The Supreme Court of India evolved this rule for hazardous enterprises. An enterprise engaged in a hazardous or inherently dangerous activity is absolutely liable for any harm caused — with NO exceptions. Not even an act of God or a third party can be used as a defence.\n\nKey Difference: Strict liability has exceptions; absolute liability has none. Absolute liability is a stricter standard applied to industries handling dangerous substances." },
+              { year: 2022, marks: 2, q: "What is Defamation? Distinguish between libel and slander.", a: "Defamation is a tort that involves making a false statement about a person that damages their reputation in the eyes of right-thinking members of society.\n\nLibel: Defamation in a permanent form — written, printed, broadcast on TV/radio, or depicted in pictures. It is actionable per se (without proving actual damage).\n\nSlander: Defamation in a transient form — spoken words or gestures. Generally, actual damage must be proved, except in cases involving criminal offences, infectious diseases, or unchastity." },
+              { year: 2024, marks: 3, q: "Explain the elements that must be proved to establish Negligence as a tort.", a: "To succeed in a negligence claim, the plaintiff must prove three elements:\n\n1. Duty of Care: The defendant owed a legal duty of care to the plaintiff. This is determined by the 'neighbour principle' — you must take reasonable care to avoid acts or omissions that could foreseeably injure your 'neighbour' (those closely affected by your actions).\n\n2. Breach of Duty: The defendant failed to meet the standard of care expected of a reasonable person in the same circumstances. For example, a doctor who fails to follow standard medical procedures breaches the duty of care.\n\n3. Resulting Damage: The plaintiff suffered actual harm as a direct consequence of the breach. The damage must be the foreseeable result of the defendant's act or omission.\n\nExample: A driver (duty: drive carefully), who runs a red light (breach), and injures a pedestrian (damage) is liable in negligence." }
+            ]
+          },
+          {
+            id: "legal-human-rights-india",
+            unit: "Unit 5A", title: "Human Rights in India", marks: 5,
+            hook: "Human rights are the Constitution's promise that power must remember the person.",
+            topics: ["Historical context", "Preamble", "Fundamental Rights (Articles 12-35)", "Directive Principles of State Policy", "Fundamental Duties"],
+            boardMoves: ["Article 12-35 classification", "DPSP non-justiciable", "rights-duties link", "case-based application"],
+            pastYearQs: [
+              { year: 2023, marks: 3, q: "Classify Fundamental Rights under the Constitution of India. Give one example of each category.", a: "Fundamental Rights (Part III, Articles 12-35) are classified into six categories:\n\n1. Right to Equality (Articles 14-18): Equality before law; prohibition of discrimination on grounds of religion, race, caste, sex, or place of birth. Example: Article 17 abolishes untouchability.\n\n2. Right to Freedom (Articles 19-22): Six freedoms under Article 19, including freedom of speech, movement, and profession. Example: A citizen can practise any trade or profession.\n\n3. Right against Exploitation (Articles 23-24): Prohibition of traffic in human beings and forced labour; prohibition of child labour below 14 years.\n\n4. Right to Freedom of Religion (Articles 25-28): Freedom of conscience and the right to profess, practise, and propagate religion.\n\n5. Cultural and Educational Rights (Articles 29-30): Protection of language, script, and culture; minority right to establish educational institutions.\n\n6. Right to Constitutional Remedies (Article 32): Right to move the Supreme Court for enforcement of Fundamental Rights through writs." },
+              { year: 2022, marks: 2, q: "Why are Directive Principles of State Policy non-justiciable? Are they still important?", a: "Directive Principles (Part IV, Articles 36-51) are non-justiciable because they cannot be enforced by any court — a citizen cannot sue the government for failing to implement them. The framers made them non-justiciable because India lacked the economic resources at independence to guarantee them as legal rights immediately.\n\nDespite being non-justiciable, they are fundamentally important:\n1. They guide Parliament and state legislatures in making laws — legislation must aim to realise DPSPs.\n2. Courts use them to test the reasonableness of restrictions on Fundamental Rights.\n3. They have led to landmark laws: minimum wages, free education, land reform, and maternity benefits." }
+            ]
+          },
+          {
+            id: "legal-international-law",
+            unit: "Unit 6", title: "International Law", marks: 8,
+            hook: "International law is the rulebook countries use when there is no world police station.",
+            topics: ["Sources of international law", "International human rights", "Customary international law", "International law and municipal law", "ICJ and dispute resolution"],
+            boardMoves: ["sources: treaty, custom, general principles", "monism vs dualism", "ICJ jurisdiction", "India and international law"],
+            pastYearQs: [
+              { year: 2024, marks: 3, q: "What are the sources of International Law? Explain any two.", a: "According to Article 38 of the ICJ Statute, the primary sources of international law are:\n1. International Conventions/Treaties, 2. International Custom, 3. General Principles of Law, and 4. Judicial decisions and teachings of publicists (subsidiary sources).\n\nExplained:\n1. International Conventions/Treaties: Written agreements between states that create binding legal obligations. Example: The UN Charter, the Vienna Convention on Diplomatic Relations, and bilateral trade treaties are binding on signatory states.\n\n2. International Custom: A general practice accepted as law (opinio juris). For a custom to become binding international law, two elements must be present: consistent state practice over time, and the belief that such practice is legally obligatory. Example: The freedom of the high seas and the principle of diplomatic immunity were originally customary before being codified in treaties." },
+              { year: 2023, marks: 3, q: "Distinguish between 'Monism' and 'Dualism' in the context of international law and municipal law.", a: "Monism: International law and municipal (domestic) law form a single, unified legal system. International law is automatically part of domestic law without any separate legislation. If there is a conflict, international law prevails. Countries like the Netherlands follow a monist approach.\n\nDualism: International law and municipal law are two completely separate legal systems. For international law to have effect domestically, it must be specifically incorporated through legislation by the national parliament. A treaty alone does not become part of domestic law until Parliament enacts it. Most common law countries, including India and the UK, follow a dualist approach.\n\nIndia's position: India follows dualism. International treaties must be enacted as legislation by Parliament. However, Indian courts use international law and ratified treaties as aids in interpreting domestic law." }
+            ]
+          }
+        ]
+      }]
     },
     {
       id: "psychology",
       name: "Psychology",
       code: "037",
       icon: "PS",
+      color: "#8b5cf6",
+      colorSoft: "#ede9fe",
       theoryMarks: 70,
       practicalMarks: 30,
       durationMinutes: 180,
       officialUrl: "https://cbseacademic.nic.in/web_material/CurriculumMain27/SecPart2/Psychology_SecP2_2026-27.pdf",
       samplePaperUrl: "https://cbseacademic.nic.in/web_material/SQP/ClassXII_2025_26/Psychology-SQP.pdf",
-      pattern: {
-        basis: "CBSE 2026-27 curriculum plus latest official Psychology sample paper structure.",
-        questionMarks: [1, 2, 3, 4, 6],
-        requestedMarksSupported: [1, 2, 3, 4, 5, 6],
-        sections: [
-          "Section A: 1-mark objective questions",
-          "Section B: 2-mark very short answers",
-          "Section C: 3-mark short answers",
-          "Section D: 4-mark long answers",
-          "Section E: 6-mark long answers",
-          "Section F: case-based questions"
-        ],
-        competencies: [
-          { name: "Remembering and understanding", weight: 50 },
-          { name: "Applying", weight: 35 },
-          { name: "Formulating, analysing, evaluating, creating", weight: 15 }
+      pattern: { basis: "CBSE 2026-27 curriculum plus latest Psychology sample paper.", questionMarks: [1, 2, 3, 4, 6], sections: ["Section A: 1-mark", "Section B: 2-mark", "Section C: 3-mark", "Section D: 4-mark", "Section E: 6-mark", "Section F: case-based"] },
+      books: [{
+        id: "psychology-xii", title: "Psychology Class XII", publisher: "NCERT",
+        chapters: [
+          {
+            id: "psych-attributes", unit: "Unit I", title: "Variations in Psychological Attributes", marks: 13,
+            hook: "Human ability is not one single scoreboard — this chapter is psychology's toolkit for understanding why.",
+            topics: ["Individual differences", "Intelligence — psychometric theories", "Triarchic theory (Sternberg)", "Multiple intelligences (Gardner)", "Emotional intelligence", "Aptitude", "Creativity"],
+            boardMoves: ["compare intelligence theories", "EQ components", "convergent vs divergent thinking", "aptitude vs interest"],
+            pastYearQs: [
+              { year: 2024, marks: 3, q: "What is Emotional Intelligence? Explain its components as given by Daniel Goleman.", a: "Emotional Intelligence (EI) refers to the ability to perceive, understand, manage, and use emotions effectively in oneself and in relationships with others. Goleman argued that EI is a better predictor of life success than IQ.\n\nGoleman's components of EI:\n1. Self-Awareness: The ability to recognise and understand your own emotions and how they affect your thoughts and behaviour.\n2. Self-Regulation: The ability to control impulsive feelings and behaviours, manage emotions healthily, and adapt to changing circumstances.\n3. Motivation: Being driven to achieve for the sake of achievement, not just for external rewards; staying optimistic even when facing setbacks.\n4. Empathy: The ability to understand the emotions of others — essential for building relationships and effective communication.\n5. Social Skills: Managing relationships well; inspiring and influencing others; managing conflict; working in a team." },
+              { year: 2023, marks: 4, q: "Explain Gardner's Theory of Multiple Intelligences. How is it different from the traditional view of intelligence?", a: "Howard Gardner proposed that intelligence is not a single general ability but a set of distinct intelligences, each representing a different way of processing information.\n\nGardner's Eight Intelligences:\n1. Linguistic: Sensitivity to language; ability to use words effectively (poets, writers)\n2. Logical-Mathematical: Ability to think logically, solve mathematical problems (scientists, mathematicians)\n3. Spatial: Ability to think in three dimensions; navigate environments (architects, pilots)\n4. Musical: Sensitivity to rhythm, pitch, and melody (musicians, composers)\n5. Bodily-Kinaesthetic: Ability to use the body skillfully (athletes, dancers, surgeons)\n6. Interpersonal: Ability to understand others' feelings and motivations (teachers, leaders)\n7. Intrapersonal: Deep self-understanding; ability to understand one's own emotions (philosophers, counsellors)\n8. Naturalistic: Ability to recognise patterns in nature (biologists, farmers)\n\nDifference from traditional view: Traditional intelligence tests measure a single IQ score, assuming intelligence is one general factor (Spearman's 'g'). Gardner argues this is too narrow — a person may excel in music but not in mathematics, and both are valid forms of intelligence." },
+              { year: 2022, marks: 3, q: "Distinguish between Convergent Thinking and Divergent Thinking. Which is associated with creativity?", a: "Convergent Thinking: Involves arriving at a single, correct answer to a well-defined problem. It follows a logical, step-by-step approach using existing knowledge. It is measured by standard IQ tests. Example: 'What is 12 × 8?' has one correct answer (96).\n\nDivergent Thinking: Involves generating multiple solutions to an open-ended problem. It involves thinking in different directions, making unusual connections, and producing original ideas. Example: 'List all the uses of a brick' — there is no single right answer; more answers = more divergent thinking.\n\nCreativity is primarily associated with Divergent Thinking. Creativity requires the ability to think flexibly and generate novel ideas, which is the hallmark of divergent thinking. However, convergent thinking is also needed to evaluate and refine creative ideas." }
+            ]
+          },
+          {
+            id: "psych-self-personality", unit: "Unit II", title: "Self and Personality", marks: 13,
+            hook: "Personality is the playlist, not one song: patterns of thinking, feeling, behaving, and becoming.",
+            topics: ["Concept of self and self-esteem", "Type approaches", "Trait approaches — Big Five", "Psychodynamic approach (Freud)", "Behavioural approach", "Humanistic approach (Maslow, Rogers)", "Assessment of personality"],
+            boardMoves: ["compare personality approaches", "Big Five traits", "projective tests", "self-concept vs self-esteem"],
+            pastYearQs: [
+              { year: 2024, marks: 3, q: "Distinguish between 'Self-concept' and 'Self-esteem'. Give an example of each.", a: "Self-concept refers to the totality of a person's knowledge and understanding of themselves — it is descriptive and includes answers to 'Who am I?' It includes beliefs about one's physical appearance, abilities, roles, and personality traits. Example: 'I am a student who is good at sports and average in mathematics.'\n\nSelf-esteem refers to the evaluative and emotional component of the self — how much we like, value, or approve of ourselves. It is the answer to 'How much do I like who I am?' Example: A student who is good at sports and values athletic ability will have high self-esteem because their self-concept matches what they value.\n\nKey Difference: Self-concept is descriptive (what I am); self-esteem is evaluative (how I feel about what I am)." },
+              { year: 2023, marks: 4, q: "Explain the Psychodynamic approach to personality as given by Sigmund Freud.", a: "Sigmund Freud's psychodynamic (psychoanalytic) approach holds that personality is shaped by unconscious forces, early childhood experiences, and conflicts between different parts of the mind.\n\nKey concepts:\n\n1. Structure of Personality (Id, Ego, Superego):\n   - Id: The primitive, unconscious part that operates on the 'pleasure principle' — seeking immediate gratification of desires. Present from birth.\n   - Ego: The rational part that operates on the 'reality principle' — mediates between the Id and the external world. Develops in infancy.\n   - Superego: The moral component — internalized rules and values of society, causing guilt when violated. Develops through socialization.\n\n2. Levels of Consciousness: Freud proposed three levels — the Conscious (what we are aware of), the Preconscious (memories we can recall), and the Unconscious (repressed desires and conflicts that drive behaviour).\n\n3. Defence Mechanisms: When the Ego cannot manage Id-Superego conflict, it uses defence mechanisms such as repression (pushing unacceptable thoughts into the unconscious), projection (attributing one's own feelings to others), and rationalization (giving logical reasons for irrational acts).\n\n4. Psychosexual Stages: Freud believed personality develops through five stages — oral, anal, phallic, latency, and genital — and unresolved conflicts at any stage lead to adult personality problems." },
+              { year: 2022, marks: 3, q: "What are the Big Five personality traits? Briefly explain each.", a: "The Big Five (also called OCEAN model) are five broad dimensions that describe personality:\n\n1. Openness to Experience: Tendency to be imaginative, creative, curious, and open to new ideas. High scorers enjoy art, novelty, and intellectual discussions. Low scorers prefer routine and tradition.\n\n2. Conscientiousness: Tendency to be organised, dependable, self-disciplined, and goal-directed. High scorers are reliable and hardworking; low scorers may be impulsive and disorganised.\n\n3. Extraversion: Tendency to be sociable, talkative, assertive, and energetic. Extraverts gain energy from social interaction; introverts prefer solitude.\n\n4. Agreeableness: Tendency to be cooperative, warm, and compassionate. High scorers are trusting and helpful; low scorers may be competitive or suspicious.\n\n5. Neuroticism (Emotional Stability): Tendency to experience negative emotions like anxiety, anger, and depression. High neuroticism = emotional instability; low neuroticism = calm and resilient." }
+            ]
+          },
+          {
+            id: "psych-life-challenges", unit: "Unit III", title: "Meeting Life Challenges", marks: 9,
+            hook: "Stress is not just pressure — it is the body's alarm system, battery drain, and training signal.",
+            topics: ["Nature, types, and sources of stress", "General Adaptation Syndrome (GAS)", "Effects of stress on health", "Coping strategies", "Stress management techniques", "Life skills"],
+            boardMoves: ["GAS three stages", "task vs emotion-oriented coping", "positive health strategies", "life skills list"],
+            pastYearQs: [
+              { year: 2023, marks: 3, q: "Explain the General Adaptation Syndrome (GAS) with its three stages.", a: "General Adaptation Syndrome (GAS) was proposed by Hans Selye to describe the body's physiological response to stress. It has three stages:\n\n1. Alarm Reaction Stage: The body immediately responds to the stressor by activating the fight-or-flight response. Adrenaline and cortisol are released, heart rate increases, muscles tense, and alertness rises. The body is mobilised to deal with the threat.\n\n2. Resistance Stage: If the stressor persists, the body tries to adapt and cope. The initial alarm subsides and the body appears to return to normal, but resources are being depleted as the body works to manage the ongoing stress. The person appears to function normally but internal resources are strained.\n\n3. Exhaustion Stage: If the stressor continues for too long, the body's adaptive resources are exhausted. The ability to resist breaks down, leading to physical and psychological symptoms — fatigue, illness, depression, and even death in extreme cases.\n\nSignificance: GAS shows that prolonged stress has serious physiological consequences — this is why chronic stress leads to diseases like hypertension, ulcers, and weakened immunity." },
+              { year: 2024, marks: 4, q: "Explain any four life skills that help in managing stress effectively.", a: "Life skills are abilities that help individuals effectively deal with the demands and challenges of everyday life. Four key life skills for managing stress:\n\n1. Self-awareness: Understanding your own emotions, strengths, weaknesses, and stress triggers allows you to identify when you are stressed and why. Self-awareness is the first step to effective coping.\n\n2. Critical Thinking: The ability to objectively analyse situations and avoid catastrophizing. A critical thinker asks 'Is this situation really as bad as I think?' and separates facts from assumptions, reducing unnecessary stress.\n\n3. Effective Communication: Expressing feelings, needs, and concerns clearly and assertively prevents misunderstandings that cause interpersonal stress. It also allows you to seek help from others effectively.\n\n4. Coping with Emotions: The ability to recognise, accept, and manage one's emotions — especially negative ones like anger, frustration, and fear. Techniques include relaxation, exercise, journaling, and talking to trusted people, all of which reduce emotional arousal linked to stress." }
+            ]
+          },
+          {
+            id: "psych-disorders", unit: "Unit IV", title: "Psychological Disorders", marks: 12,
+            hook: "Diagnosis is not name-calling — it is a careful map of distress, impairment, and patterns.",
+            topics: ["Concepts of abnormality", "Anxiety disorders", "OCD", "PTSD", "Depressive disorder", "Bipolar disorder", "Schizophrenia", "Neurodevelopmental disorders", "Eating disorders", "Substance-related disorders"],
+            boardMoves: ["classify by symptoms", "compare depression and bipolar", "schizophrenia features", "case-based identification"],
+            pastYearQs: [
+              { year: 2024, marks: 3, q: "What is Obsessive-Compulsive Disorder (OCD)? Describe its main features.", a: "Obsessive-Compulsive Disorder (OCD) is an anxiety-related psychological disorder characterised by persistent, unwanted thoughts (obsessions) and repetitive behaviours (compulsions) performed to reduce the anxiety caused by those thoughts.\n\nObsessions: Intrusive, recurring thoughts or urges that the person finds disturbing. Example: Persistent fear of contamination by germs.\n\nCompulsions: Repetitive behaviours or mental acts performed to neutralise the anxiety caused by obsessions. Example: Washing hands repeatedly, checking locks many times, counting objects.\n\nKey features:\n1. The person recognises the obsessions as irrational but cannot stop them.\n2. Compulsions provide temporary relief but reinforce the cycle.\n3. The disorder significantly impairs daily functioning.\n4. It is NOT a character flaw or a sign of weakness — it is a neurobiological condition." },
+              { year: 2023, marks: 3, q: "Distinguish between Major Depressive Disorder and Bipolar Disorder.", a: "Major Depressive Disorder (MDD): Characterised by one or more episodes of severe depression — persistent sadness, loss of interest, fatigue, feelings of worthlessness, sleep disturbances, and sometimes suicidal thoughts. The mood is only depressed — there are no episodes of abnormally elevated mood. It is the 'down without any ups' disorder.\n\nBipolar Disorder: Characterised by alternating episodes of depression AND mania (or hypomania). During manic episodes, the person feels unusually elated, has racing thoughts, needs little sleep, shows impulsive behaviour, and may engage in reckless activities. This 'highs and lows' pattern distinguishes it from MDD.\n\nKey Difference: In MDD there is only depressive mood; in Bipolar Disorder there are both depressive AND manic episodes." }
+            ]
+          },
+          {
+            id: "psych-therapy", unit: "Unit V", title: "Therapeutic Approaches", marks: 9,
+            hook: "Therapy is structured help — listening with a method, changing patterns with care.",
+            topics: ["Nature of psychotherapy", "Therapeutic relationship", "Behaviour therapy", "Cognitive therapy (CBT)", "Humanistic-existential therapy", "Ethics in psychotherapy", "Rehabilitation"],
+            boardMoves: ["CBT steps", "behaviour vs cognitive therapy", "therapeutic alliance importance", "ethics principles"],
+            pastYearQs: [
+              { year: 2023, marks: 4, q: "Explain Cognitive Behaviour Therapy (CBT). How does it help in treating psychological disorders?", a: "Cognitive Behaviour Therapy (CBT) is a structured, time-limited psychotherapy that focuses on the relationship between thoughts (cognitions), feelings, and behaviours. It was developed by Aaron Beck and combines cognitive and behavioural techniques.\n\nCore principle: Psychological problems arise from faulty thinking patterns (cognitive distortions). By identifying and changing these distorted thoughts, a person can change their emotions and behaviours.\n\nHow it works:\n1. Identifying automatic negative thoughts: The therapist helps the client become aware of distorted thoughts — such as catastrophizing ('Everything is ruined'), all-or-nothing thinking, or personalisation.\n2. Challenging distortions: The client is taught to examine evidence for and against their thoughts, replacing irrational beliefs with realistic ones.\n3. Behavioural experiments: The client tests their assumptions through real-world activities — for example, a socially anxious person practises social interactions.\n4. Homework: Clients practise techniques outside sessions through journaling, thought records, and exposure exercises.\n\nHelps treat: Depression, anxiety disorders, OCD, PTSD, phobias, and eating disorders. CBT is highly effective because it gives clients practical skills they can use long after therapy ends." }
+            ]
+          },
+          {
+            id: "psych-attitudes", unit: "Unit VI", title: "Attitude and Social Cognition", marks: 8,
+            hook: "An attitude is a tiny committee in the mind — feelings, beliefs, and action tendencies voting together.",
+            topics: ["Nature and components of attitudes (ABC)", "Attitude formation", "Attitude change", "Attitude-behaviour relationship", "Prejudice and discrimination", "Strategies for handling prejudice"],
+            boardMoves: ["ABC components", "cognitive dissonance", "prejudice sources", "contact hypothesis"],
+            pastYearQs: [
+              { year: 2023, marks: 3, q: "Explain the ABC components of attitude with an example.", a: "Attitudes have three components, remembered as ABC:\n\nA — Affective component (Feeling): The emotional response towards the attitude object — how you feel about it. Example: A student feels excited and happy when they think about cricket.\n\nB — Behavioural component (Action tendency): The predisposition to behave in a certain way towards the attitude object. Example: The student watches every cricket match, buys cricket merchandise, and joins a cricket club.\n\nC — Cognitive component (Belief): The beliefs, thoughts, and knowledge a person has about the attitude object. Example: The student believes cricket is the most skillful sport, that it teaches teamwork, and that India is the best cricket team.\n\nThese three components are generally consistent with each other. A person who believes (C) that eating junk food is unhealthy will feel (A) guilty about it and will tend to avoid it (B). Inconsistency between A, B, and C causes cognitive dissonance." },
+              { year: 2024, marks: 3, q: "Explain any three strategies to reduce prejudice.", a: "Prejudice is an unfavourable attitude towards a group based on stereotypes. Strategies to reduce it:\n\n1. Education and Information: Providing accurate information about groups that are targets of prejudice can help correct stereotypes and misinformation. School curricula that teach about different cultures and histories reduce ethnocentrism.\n\n2. Intergroup Contact (Contact Hypothesis): Allport proposed that contact between groups reduces prejudice when the contact is: equal status, cooperative (working towards a shared goal), and supported by social norms favouring equality. Example: Students from different communities working together on a school project.\n\n3. Promoting Empathy: Encouraging people to take the perspective of members of the outgroup — to understand their feelings and experiences — reduces negative attitudes. Role-playing exercises and exposure to personal stories of outgroup members are effective." }
+            ]
+          },
+          {
+            id: "psych-groups", unit: "Unit VII", title: "Social Influence and Group Processes", marks: 6,
+            hook: "Groups can lift effort, hide effort, sharpen opinions, and quietly rewrite choices.",
+            topics: ["Nature and types of groups", "Social loafing", "Group polarisation", "Conformity", "Compliance", "Obedience"],
+            boardMoves: ["social loafing vs polarisation", "Asch conformity", "Milgram obedience", "group pressure examples"],
+            pastYearQs: [
+              { year: 2024, marks: 3, q: "Distinguish between 'Social Loafing' and 'Group Polarisation'.", a: "Social Loafing: The tendency of individuals to exert less effort when working in a group compared to working alone. It occurs because individuals feel their contribution is less identifiable and therefore less accountable. Example: In a tug-of-war, each individual pulls less hard than they would alone. Social loafing reduces group performance.\n\nGroup Polarisation: The tendency of group discussion to make members' attitudes more extreme (more polarised) than their individual initial positions. After discussion, the group moves in the direction of the dominant pre-discussion view, but more strongly. Example: A group of students who individually lean towards a strict school policy become even more strict in their collective decision after discussion.\n\nKey Difference: Social loafing reduces individual effort in groups; group polarisation makes group opinions more extreme than individual opinions." },
+              { year: 2022, marks: 3, q: "What is Conformity? What factors influence conformity?", a: "Conformity is a change in a person's behaviour or beliefs to match those of others, motivated by real or imagined group pressure. It does not require direct instruction — the mere presence of a group norm is enough.\n\nFactors that influence conformity:\n1. Group size: Conformity increases up to a group size of 3-4, after which additional members have little effect.\n2. Unanimity: If the group is unanimous, conformity is high. If even one member disagrees (a dissenter), conformity drops sharply.\n3. Ambiguity of the situation: When the correct answer is unclear, people rely more on others, increasing conformity.\n4. Culture: Collectivist cultures (like India) show more conformity than individualistic cultures (like USA).\n5. Public vs private response: Conformity is higher when responses are public; people may privately disagree but conform publicly." }
+            ]
+          }
         ]
-      },
-      books: [
-        {
-          id: "psychology-xii",
-          title: "Psychology Class XII",
-          publisher: "NCERT",
-          chapters: [
-            {
-              id: "psych-attributes",
-              unit: "Unit I",
-              title: "Variations in Psychological Attributes",
-              marks: 13,
-              topics: [
-                "Individual differences in human functioning",
-                "Assessment of psychological attributes",
-                "Intelligence",
-                "Psychometric theories of intelligence",
-                "Information processing theory",
-                "Triarchic theory of intelligence",
-                "Theory of multiple intelligences",
-                "Culture and intelligence",
-                "Emotional intelligence",
-                "Aptitude",
-                "Creativity"
-              ],
-              boardMoves: ["theory comparison", "test interpretation", "intelligence types", "aptitude versus interest"],
-              hook: "This chapter is psychology's toolkit for noticing that human ability is not one single scoreboard."
-            },
-            {
-              id: "psych-self-personality",
-              unit: "Unit II",
-              title: "Self and Personality",
-              marks: 13,
-              topics: [
-                "Self and personality",
-                "Concept of self",
-                "Cognitive and behavioural aspects of self",
-                "Culture and self",
-                "Concept of personality",
-                "Type approaches",
-                "Trait approaches",
-                "Psychodynamic approach",
-                "Behavioural approach",
-                "Cultural approach",
-                "Humanistic approach",
-                "Assessment of personality"
-              ],
-              boardMoves: ["approaches to personality", "self-esteem", "projective tests", "trait comparison"],
-              hook: "Personality is the playlist, not one song: patterns of thinking, feeling, behaving, and becoming."
-            },
-            {
-              id: "psych-life-challenges",
-              unit: "Unit III",
-              title: "Meeting Life Challenges",
-              marks: 9,
-              topics: [
-                "Nature, types, and sources of stress",
-                "Effects of stress on psychological functioning and health",
-                "General Adaptation Syndrome",
-                "Stress and immune system",
-                "Lifestyle",
-                "Coping with stress",
-                "Stress management techniques",
-                "Promoting positive health and well-being",
-                "Life skills",
-                "Positive health"
-              ],
-              boardMoves: ["stress cycle", "coping strategies", "GAS stages", "life skills"],
-              hook: "Stress is not just pressure; it is the body's alarm system, battery drain, and training signal."
-            },
-            {
-              id: "psych-disorders",
-              unit: "Unit IV",
-              title: "Psychological Disorders",
-              marks: 12,
-              topics: [
-                "Concepts of abnormality and psychological disorders",
-                "Historical background",
-                "Classification of psychological disorders",
-                "Factors underlying abnormal behaviour",
-                "Anxiety disorders",
-                "Obsessive-compulsive and related disorders",
-                "Trauma and stressor-related disorders",
-                "Somatic symptom and related disorders",
-                "Dissociative disorders",
-                "Depressive disorder",
-                "Bipolar and related disorders",
-                "Schizophrenia spectrum and psychotic disorders",
-                "Neurodevelopmental disorders",
-                "Feeding and eating disorders",
-                "Substance related and addictive disorders"
-              ],
-              boardMoves: ["classify symptoms", "disorder features", "historical models", "case identification"],
-              hook: "Diagnosis is not name-calling; it is a careful map of distress, impairment, and patterns."
-            },
-            {
-              id: "psych-therapy",
-              unit: "Unit V",
-              title: "Therapeutic Approaches",
-              marks: 9,
-              topics: [
-                "Nature and process of psychotherapy",
-                "Therapeutic relationship",
-                "Behaviour therapy",
-                "Cognitive therapy",
-                "Humanistic-existential therapy",
-                "Alternative therapies",
-                "Factors contributing to healing in psychotherapy",
-                "Ethics in psychotherapy",
-                "Rehabilitation of the mentally ill"
-              ],
-              boardMoves: ["therapy type matching", "therapeutic alliance", "ethics", "rehabilitation"],
-              hook: "Therapy is structured help: listening with a method, changing patterns with care."
-            },
-            {
-              id: "psych-attitudes",
-              unit: "Unit VI",
-              title: "Attitude and Social Cognition",
-              marks: 8,
-              topics: [
-                "Explaining social behaviour",
-                "Nature and components of attitudes",
-                "Attitude formation",
-                "Attitude change",
-                "Attitude-behaviour relationship",
-                "Prejudice and discrimination",
-                "Strategies for handling prejudice"
-              ],
-              boardMoves: ["ABC components", "attitude change", "prejudice reduction", "behaviour link"],
-              hook: "An attitude is a tiny committee in the mind: feelings, beliefs, and action tendencies voting together."
-            },
-            {
-              id: "psych-groups",
-              unit: "Unit VII",
-              title: "Social Influence and Group Processes",
-              marks: 6,
-              topics: [
-                "Nature and formation of groups",
-                "Types of groups",
-                "Influence of group on individual behaviour",
-                "Social loafing",
-                "Group polarisation",
-                "Conformity",
-                "Compliance",
-                "Obedience",
-                "Cooperation and competition"
-              ],
-              boardMoves: ["group type", "influence process", "loafing versus polarisation", "conformity examples"],
-              hook: "Groups can lift effort, hide effort, sharpen opinions, and quietly rewrite choices."
-            }
-          ]
-        }
-      ]
+      }]
     },
     {
       id: "economics",
       name: "Economics",
       code: "030",
       icon: "EC",
+      color: "#10b981",
+      colorSoft: "#d1fae5",
       theoryMarks: 80,
       practicalMarks: 20,
       durationMinutes: 180,
       officialUrl: "https://cbseacademic.nic.in/web_material/CurriculumMain27/SecPart2/Economics_SecP2_2026-27.pdf",
       samplePaperUrl: "https://cbseacademic.nic.in/web_material/SQP/ClassXII_2025_26/Economics-SQP.pdf",
-      pattern: {
-        basis: "CBSE 2026-27 curriculum question-paper design and latest Economics sample paper.",
-        questionMarks: [1, 3, 4, 6],
-        requestedMarksSupported: [1, 2, 3, 4, 5, 6],
-        sections: [
-          "Section A: Introductory Macroeconomics",
-          "Section B: Indian Economic Development",
-          "20 objective questions of 1 mark",
-          "3-mark, 4-mark, and 6-mark descriptive questions"
-        ],
-        competencies: [
-          { name: "Remembering and understanding", weight: 40 },
-          { name: "Applying", weight: 30 },
-          { name: "Analysing, evaluating, creating", weight: 30 }
-        ]
-      },
+      pattern: { basis: "CBSE 2026-27 curriculum. 20 objective 1-mark questions; 3, 4, and 6-mark descriptive questions.", questionMarks: [1, 3, 4, 6], sections: ["Section A: Macroeconomics", "Section B: Indian Economic Development", "Part 1: 20 MCQs", "Part 2: Descriptive 3/4/6 mark questions"] },
       books: [
         {
-          id: "economics-macro",
-          title: "Introductory Macroeconomics",
-          publisher: "NCERT",
+          id: "economics-macro", title: "Introductory Macroeconomics", publisher: "NCERT",
           chapters: [
             {
-              id: "eco-national-income",
-              unit: "Unit 1",
-              title: "National Income and Related Aggregates",
-              marks: 10,
-              topics: [
-                "Meaning of macroeconomics",
-                "Consumption goods, capital goods, final goods, and intermediate goods",
-                "Stocks and flows",
-                "Gross investment and depreciation",
-                "Circular flow of income",
-                "Value added method",
-                "Expenditure method",
-                "Income method",
-                "GNP, NNP, GDP, and NDP",
-                "Market price and factor cost",
-                "Real and nominal GDP",
-                "GDP deflator",
-                "GDP and welfare"
-              ],
-              boardMoves: ["numerical aggregates", "method selection", "real versus nominal", "welfare limits"],
-              hook: "National income is the economy's report card, but you must read the footnotes."
+              id: "eco-national-income", unit: "Unit 1", title: "National Income and Related Aggregates", marks: 10,
+              hook: "National income is the economy's report card — but you must read the footnotes.",
+              topics: ["Circular flow of income", "GDP, GNP, NNP, NDP", "Value Added Method", "Expenditure Method", "Income Method", "Real vs Nominal GDP", "GDP deflator", "GDP and welfare"],
+              boardMoves: ["numerical aggregates calculation", "method selection and steps", "real vs nominal distinction", "welfare limitations of GDP"],
+              pastYearQs: [
+                { year: 2024, marks: 4, q: "Define 'GDP Deflator'. How does Real GDP differ from Nominal GDP?", a: "GDP Deflator is a price index that measures the change in prices of all goods and services included in GDP. It is used to convert Nominal GDP into Real GDP.\n\nFormula: GDP Deflator = (Nominal GDP / Real GDP) × 100\n\nNominal GDP is the market value of all final goods and services produced in a country during a year, measured at current year prices. It increases with both output growth and price increases, so it can rise even if real output falls due to inflation.\n\nReal GDP is Nominal GDP adjusted for price changes. It measures output at base year prices, removing the effect of inflation. It reflects the actual change in the volume of goods and services produced.\n\nExample: If Nominal GDP = ₹200 lakh crore and GDP Deflator = 125, then Real GDP = (200/125) × 100 = ₹160 lakh crore.\n\nReal GDP is a more accurate measure of economic growth because it reflects actual output changes, not just price changes." },
+                { year: 2023, marks: 3, q: "Explain the 'Expenditure Method' of measuring national income. Name its components.", a: "The Expenditure Method measures national income by adding up all final expenditures on goods and services produced in an economy during a year.\n\nFormula: GDP at Market Price = C + I + G + (X – M)\n\nComponents:\n1. Private Final Consumption Expenditure (C): Total spending by households on goods and services — food, clothing, housing, healthcare, education.\n2. Gross Domestic Capital Formation (I): Business investment on capital goods — machinery, equipment, construction, plus change in stocks.\n3. Government Final Consumption Expenditure (G): Government spending on goods and services for current use — salaries of government employees, defence, administration.\n4. Net Exports (X – M): Exports minus Imports. Exports add to domestic demand; imports are deducted as they represent spending on foreign goods.\n\nNote: Transfer payments (subsidies, pensions) are NOT included as they do not involve production of new goods or services." },
+                { year: 2022, marks: 3, q: "What is the problem of 'Double Counting' in national income estimation? How is it avoided?", a: "Double Counting refers to the error of counting the value of a good more than once in national income estimation, leading to an overestimate of GDP.\n\nExample: Cotton (₹100) → Thread (₹200) → Cloth (₹400) → Garment (₹600). If we add all these: ₹1300, we have counted the value of cotton 4 times, thread 3 times, etc.\n\nHow it is avoided:\n1. Final Goods Method: Count only the value of final goods (₹600 — the garment). Intermediate goods (cotton, thread, cloth) are excluded.\n2. Value Added Method: Count only the value added at each stage — Cotton (₹100) + Thread (₹100) + Cloth (₹200) + Garment (₹200) = ₹600. This avoids counting the same value multiple times." },
+                { year: 2021, marks: 3, q: "Explain any three limitations of using GDP as a measure of economic welfare.", a: "GDP per capita is commonly used as a proxy for the standard of living, but it has several limitations as a welfare measure:\n\n1. Distribution of income: GDP does not reveal how income is distributed. A high GDP can coexist with extreme inequality — a few very rich people can inflate the average while most citizens remain poor.\n\n2. Non-monetary activities: GDP excludes the value of household work (cooking, childcare, unpaid care) and voluntary work, even though these contribute to well-being.\n\n3. Negative externalities: GDP counts the output of industries that cause pollution, but does not subtract the welfare loss from environmental damage. A country that cuts all its forests raises its GDP from timber sales but reduces welfare from loss of ecological services.\n\n4. Composition of output: GDP does not distinguish between useful and harmful goods. Spending on weapons and cigarettes raises GDP the same as spending on education and healthcare." }
+              ]
             },
             {
-              id: "eco-money-banking",
-              unit: "Unit 2",
-              title: "Money and Banking",
-              marks: 6,
-              topics: [
-                "Meaning and functions of money",
-                "Supply of money",
-                "Currency held by the public",
-                "Net demand deposits",
-                "Money creation by commercial banks",
-                "Central bank functions",
-                "Bank rate",
-                "CRR and SLR",
-                "Repo and reverse repo rate",
-                "Open market operations",
-                "Margin requirement"
-              ],
-              boardMoves: ["M1 calculation", "central bank tools", "credit creation", "policy impact"],
-              hook: "Money moves like blood through the economy; banks and the central bank control the pulse."
+              id: "eco-money-banking", unit: "Unit 2", title: "Money and Banking", marks: 6,
+              hook: "Money moves like blood through the economy; banks and the central bank control the pulse.",
+              topics: ["Functions of money", "Money supply (M1)", "Credit creation by commercial banks", "Central bank functions", "Repo rate, reverse repo, CRR, SLR", "Open market operations", "Bank rate"],
+              boardMoves: ["M1 calculation", "credit creation numerical", "central bank tools and direction", "repo vs bank rate"],
+              pastYearQs: [
+                { year: 2024, marks: 3, q: "Explain the process of credit creation by commercial banks with an example.", a: "Credit creation (money multiplication) is the process by which commercial banks create money far in excess of initial deposits by repeatedly lending out a fraction of deposits while keeping a minimum reserve.\n\nProcess:\n- Assumption: Legal Reserve Ratio (LRR) = 20%\n- A deposits ₹1,000 in Bank 1.\n- Bank 1 keeps ₹200 (20%) as reserve and lends ₹800 to B.\n- B deposits ₹800 in Bank 2. Bank 2 keeps ₹160 and lends ₹640 to C.\n- C deposits ₹640 in Bank 3. Bank 3 keeps ₹128 and lends ₹512...\n\nThis chain continues until all lending capacity is exhausted.\n\nTotal money created = Initial Deposit × (1/LRR) = ₹1,000 × (1/0.20) = ₹5,000\n\nSo from an initial deposit of ₹1,000, the banking system creates ₹5,000 of total deposits — an increase of ₹4,000 in money supply." },
+                { year: 2023, marks: 3, q: "What is Repo Rate? How does an increase in Repo Rate help control inflation?", a: "Repo Rate (Repurchase Rate) is the rate at which the Reserve Bank of India (RBI) lends short-term funds to commercial banks against government securities. Commercial banks borrow from the RBI when they face a liquidity shortage.\n\nHow an increase in Repo Rate controls inflation:\n1. Commercial banks face higher borrowing costs from the RBI.\n2. Banks pass on this cost to customers by raising interest rates on loans.\n3. Higher interest rates make borrowing expensive for businesses and consumers.\n4. Investment and consumption spending fall — aggregate demand decreases.\n5. With lower demand, producers cannot raise prices easily — inflationary pressure falls.\n\nIn short: ↑ Repo Rate → ↑ Bank lending rates → ↓ Borrowing → ↓ Money supply → ↓ Demand → ↓ Inflation." }
+              ]
             },
             {
-              id: "eco-income-employment",
-              unit: "Unit 3",
-              title: "Determination of Income and Employment",
-              marks: 12,
-              topics: [
-                "Aggregate demand and its components",
-                "Propensity to consume",
-                "Propensity to save",
-                "Short-run equilibrium output",
-                "Investment multiplier",
-                "Full employment",
-                "Involuntary unemployment",
-                "Excess demand",
-                "Deficient demand",
-                "Fiscal and monetary measures"
-              ],
-              boardMoves: ["AD components", "multiplier numericals", "gap diagnosis", "corrective measures"],
-              hook: "This chapter is the thermostat of the economy: too hot, too cold, and what policy can adjust."
+              id: "eco-income-employment", unit: "Unit 3", title: "Determination of Income and Employment", marks: 12,
+              hook: "This chapter is the economy's thermostat — too hot, too cold, and what policy can fix it.",
+              topics: ["Aggregate Demand and its components", "Marginal Propensity to Consume (MPC) and Save (MPS)", "Investment Multiplier", "Equilibrium output (45° line)", "Excess demand and deficient demand", "Fiscal and monetary measures"],
+              boardMoves: ["AD components C+I+G+(X-M)", "multiplier formula and numerical", "gap diagram explanation", "corrective policy measures"],
+              pastYearQs: [
+                { year: 2024, marks: 4, q: "Define Investment Multiplier. If MPC = 0.8, find the value of the multiplier and show the effect of ₹500 crore increase in investment.", a: "Investment Multiplier (k) is the ratio of change in national income (ΔY) to the change in investment (ΔI) that caused it.\n\nFormula: k = ΔY/ΔI = 1/(1–MPC) = 1/MPS\n\nCalculation:\nMPC = 0.8, therefore MPS = 1 – 0.8 = 0.2\nk = 1/0.2 = 5\n\nEffect of ₹500 crore increase in investment:\nΔY = k × ΔI = 5 × ₹500 crore = ₹2,500 crore\n\nInterpretation: A ₹500 crore increase in investment will lead to a ₹2,500 crore increase in national income.\n\nWhy? The initial investment of ₹500 crore creates income for workers and suppliers. They spend 80% (MPC = 0.8), which becomes income for others, who again spend 80%, and so on. This chain of expenditure creates a multiplied effect on national income." },
+                { year: 2023, marks: 3, q: "What is 'Deficient Demand'? Explain its effects and two fiscal measures to correct it.", a: "Deficient Demand (or Recessionary Gap) occurs when Aggregate Demand (AD) in the economy is less than Aggregate Supply (AS) at the full employment level. The economy produces less than its potential output.\n\nEffects:\n1. Output falls below the full employment level, leading to a negative output gap.\n2. Involuntary unemployment rises — firms produce less and need fewer workers.\n3. Prices may fall (deflation) or growth stagnates.\n\nFiscal measures to correct deficient demand:\n1. Increase in Government Expenditure: The government increases spending on public works, infrastructure, or social services. This directly raises Aggregate Demand (G in C+I+G+(X-M)) and creates jobs, which further increases consumer spending through the multiplier effect.\n2. Reduction in Taxes: Lowering personal income tax or indirect taxes increases disposable income of households, boosting private consumption expenditure (C) — a component of Aggregate Demand." },
+                { year: 2022, marks: 3, q: "Distinguish between 'Excess Demand' and 'Deficient Demand'. What is each called in terms of output gap?", a: "Excess Demand (Inflationary Gap): Occurs when Aggregate Demand exceeds Aggregate Supply at the full employment level. The economy 'wants' more than it can produce at current prices, causing inflation. The output gap is positive. Prices rise as too much money chases too few goods.\n\nDeficient Demand (Recessionary Gap): Occurs when Aggregate Demand falls short of Aggregate Supply at the full employment level. The economy produces less than its capacity, causing unemployment. The output gap is negative. Prices fall or stagnate.\n\nSummary:\n- Excess Demand → AD > AS at full employment → Inflationary Gap → Inflation\n- Deficient Demand → AD < AS at full employment → Recessionary Gap → Unemployment" }
+              ]
             },
             {
-              id: "eco-budget",
-              unit: "Unit 4",
-              title: "Government Budget and the Economy",
-              marks: 6,
-              topics: [
-                "Meaning of government budget",
-                "Objectives of budget",
-                "Revenue receipts and capital receipts",
-                "Revenue expenditure and capital expenditure",
-                "Balanced budget",
-                "Surplus budget",
-                "Deficit budget",
-                "Measures of government deficit"
-              ],
-              boardMoves: ["receipt classification", "expenditure classification", "deficit measures", "policy purpose"],
-              hook: "A budget is not just spending; it is the government's priorities written in numbers."
+              id: "eco-budget", unit: "Unit 4", title: "Government Budget and the Economy", marks: 6,
+              hook: "A budget is not just spending — it is the government's priorities written in numbers.",
+              topics: ["Revenue vs capital receipts", "Revenue vs capital expenditure", "Types of deficit — revenue, fiscal, primary", "Budget objectives"],
+              boardMoves: ["receipt classification", "expenditure classification", "deficit formula", "deficit implications"],
+              pastYearQs: [
+                { year: 2024, marks: 3, q: "Classify the following into Revenue Receipts and Capital Receipts: (i) Dividends from PSUs, (ii) Borrowings from RBI, (iii) Tax revenue, (iv) Recovery of loans", a: "Revenue Receipts are those receipts that neither create a liability nor reduce an asset for the government:\n(i) Dividends from PSUs — Revenue Receipt (income received without creating liability)\n(iii) Tax Revenue — Revenue Receipt (no liability created)\n\nCapital Receipts are those that either create a liability or reduce an asset:\n(ii) Borrowings from RBI — Capital Receipt (creates a liability to repay)\n(iv) Recovery of loans — Capital Receipt (reduces a government asset — the loan given out)" },
+                { year: 2023, marks: 3, q: "What is 'Primary Deficit'? How does it differ from Fiscal Deficit?", a: "Fiscal Deficit is the excess of total government expenditure over total receipts excluding borrowings. It represents the total borrowing requirement of the government.\n\nFormula: Fiscal Deficit = Total Expenditure – Revenue Receipts – Capital Receipts (excluding borrowings)\n\nPrimary Deficit is Fiscal Deficit minus interest payments on past borrowings.\n\nFormula: Primary Deficit = Fiscal Deficit – Interest Payments\n\nDifference:\n- Fiscal Deficit shows the total gap the government must fill through borrowing — including to service past debt.\n- Primary Deficit shows how much the current government's policies (excluding past debt burden) contribute to the deficit. If Primary Deficit is zero, the government is borrowing only to pay interest on old loans — not for new spending.\n\nA falling Primary Deficit is a positive sign of fiscal consolidation." }
+              ]
             },
             {
-              id: "eco-bop",
-              unit: "Unit 5",
-              title: "Balance of Payments",
-              marks: 6,
-              topics: [
-                "Meaning and components of balance of payments",
-                "Surplus and deficit",
-                "Foreign exchange rate",
-                "Fixed exchange rate",
-                "Flexible exchange rate",
-                "Managed floating",
-                "Exchange-rate determination",
-                "Merits and demerits of exchange-rate systems"
-              ],
-              boardMoves: ["account classification", "rate systems", "currency movement", "policy comparison"],
-              hook: "The balance of payments is the country's wallet for the world."
+              id: "eco-bop", unit: "Unit 5", title: "Balance of Payments", marks: 6,
+              hook: "The balance of payments is the country's wallet for the world.",
+              topics: ["Components of BoP — current and capital account", "Surplus and deficit in BoP", "Exchange rate systems — fixed, flexible, managed floating", "Determination of exchange rate"],
+              boardMoves: ["account classification", "BoP always balances", "exchange rate direction", "appreciation vs depreciation"],
+              pastYearQs: [
+                { year: 2024, marks: 3, q: "Distinguish between 'Fixed Exchange Rate' and 'Flexible (Floating) Exchange Rate'.", a: "Fixed Exchange Rate: The value of a country's currency is set and maintained at a fixed rate by the government or central bank against another currency or gold. The central bank intervenes in the foreign exchange market (buying/selling foreign currency) to maintain the peg. Example: India maintained a fixed rate regime before 1991.\n\nAdvantages: Stability, predictability for international trade; reduces speculation.\nDisadvantage: Requires large foreign exchange reserves; inflexible to economic shocks.\n\nFlexible (Floating) Exchange Rate: The exchange rate is determined purely by the forces of demand and supply in the foreign exchange market, with no government intervention. Example: USA, UK operate flexible exchange rates.\n\nAdvantages: Automatic adjustment to economic conditions; no need for large reserves.\nDisadvantage: Uncertainty and volatility can discourage international trade.\n\nIndia currently follows a Managed Floating system — market determines the rate, but RBI intervenes occasionally to prevent excessive volatility." }
+              ]
             }
           ]
         },
         {
-          id: "economics-ied",
-          title: "Indian Economic Development",
-          publisher: "NCERT",
+          id: "economics-ied", title: "Indian Economic Development", publisher: "NCERT",
           chapters: [
             {
-              id: "eco-development-experience",
-              unit: "Unit 6",
-              title: "Development Experience 1947-90 and Reforms Since 1991",
-              marks: 12,
-              topics: [
-                "Indian economy on the eve of independence",
-                "Common goals of Five Year Plans",
-                "Agriculture: features, problems, and policies",
-                "Industry and Industrial Policy Resolution 1956",
-                "Small scale industries",
-                "Foreign trade",
-                "Liberalisation",
-                "Globalisation",
-                "Privatisation",
-                "Demonetization",
-                "GST"
-              ],
-              boardMoves: ["pre-1991 comparison", "plan objectives", "LPG appraisal", "policy timeline"],
-              hook: "India's economy has a before-and-after story: planning, pressure, reform, and adjustment."
+              id: "eco-development-experience", unit: "Unit 6", title: "Development Experience 1947–90 and Reforms Since 1991", marks: 12,
+              hook: "India's economy has a before-and-after story: planning, pressure, reform, and adjustment.",
+              topics: ["Indian economy at independence", "Five Year Plans — goals", "Agriculture policies", "Industrial Policy Resolution 1956", "Liberalisation, Privatisation, Globalisation (LPG)", "Demonetization", "GST"],
+              boardMoves: ["pre-1991 vs post-1991", "LPG reforms explained", "plan objectives", "GST benefits and drawbacks"],
+              pastYearQs: [
+                { year: 2023, marks: 4, q: "What were the main features of the Indian economy on the eve of Independence in 1947?", a: "India's economy in 1947 was in a poor state as a result of nearly 200 years of colonial rule:\n\n1. Stagnant agriculture: Agriculture was the main occupation of about 75% of the population, but productivity was very low due to fragmented landholdings, lack of irrigation, and primitive technology. The zamindari system exploited peasants.\n\n2. Deindustrialisation: British policies destroyed India's traditional manufacturing industries (like the textile industry) by flooding the market with cheap British goods. India was reduced to a supplier of raw materials and a market for British finished goods.\n\n3. Underdeveloped infrastructure: Railways built by the British served colonial interests (to transport raw materials to ports), not India's developmental needs. Roads, communications, and healthcare were poorly developed.\n\n4. Low per capita income and widespread poverty: Per capita income was extremely low, life expectancy was 32 years, literacy was below 17%, and infant mortality was very high.\n\n5. Underdeveloped financial system: Banks and financial institutions were concentrated in a few urban centres and served British commercial interests." },
+                { year: 2024, marks: 3, q: "Explain the concept of GST. State any two advantages of GST.", a: "Goods and Services Tax (GST) is a comprehensive, multi-stage, destination-based indirect tax that replaced multiple central and state indirect taxes (VAT, service tax, excise duty, etc.) in India from July 1, 2017. It follows a 'one nation, one tax' principle.\n\nGST is collected at each stage of production/distribution, but the tax burden ultimately falls on the final consumer through an input tax credit mechanism — businesses can claim credit for GST paid on inputs.\n\nAdvantages:\n1. Elimination of cascading effect (tax on tax): Under the old system, taxes were levied on taxes, increasing prices. GST allows input tax credit, eliminating this cascading effect and reducing production costs.\n2. Simplified tax structure: GST replaced over 17 different taxes and 23 cesses with a single unified tax, reducing compliance burden on businesses and making the tax system more transparent." }
+              ]
             },
             {
-              id: "eco-current-challenges",
-              unit: "Unit 7",
-              title: "Current Challenges Facing Indian Economy",
-              marks: 20,
-              topics: [
-                "Human capital formation",
-                "Education sector growth",
-                "Rural development",
-                "Rural credit and marketing",
-                "Cooperatives",
-                "Agricultural diversification",
-                "Organic farming",
-                "Employment",
-                "Formal and informal sectors",
-                "Sustainable economic development",
-                "Resources and environment",
-                "Global warming"
-              ],
-              boardMoves: ["human capital role", "rural policy", "employment data interpretation", "sustainability"],
-              hook: "This unit is economics with muddy shoes: schools, farms, jobs, environment, and real lives."
+              id: "eco-current-challenges", unit: "Unit 7", title: "Current Challenges Facing Indian Economy", marks: 20,
+              hook: "This unit is economics with muddy shoes — schools, farms, jobs, environment, and real lives.",
+              topics: ["Human capital formation", "Education and health sector", "Rural development and rural credit", "Employment — formal vs informal", "Sustainable development", "Global warming and environmental challenges"],
+              boardMoves: ["human capital vs physical capital", "rural credit sources", "formal vs informal employment", "sustainable development definition"],
+              pastYearQs: [
+                { year: 2024, marks: 3, q: "Distinguish between 'Human Capital' and 'Physical Capital' with examples.", a: "Human Capital refers to the stock of knowledge, skills, education, health, and abilities embodied in people that enables them to be economically productive.\n\nExamples: A doctor's medical training, an engineer's technical education, a worker's vocational skills.\n\nPhysical Capital refers to tangible man-made assets used in the production of goods and services.\n\nExamples: Machinery, buildings, computers, tools, vehicles.\n\nKey Differences:\n1. Nature: Human capital is intangible (in the human mind); physical capital is tangible.\n2. Mobility: Human capital moves with the person and cannot be separated; physical capital can be sold or transferred independently.\n3. Depreciation: Physical capital depreciates with use; human capital can actually appreciate with experience and continuous learning.\n4. Development: Investment in human capital includes education, healthcare, and on-the-job training; investment in physical capital involves purchase of machinery and equipment." },
+                { year: 2023, marks: 4, q: "What is meant by 'Sustainable Economic Development'? What are the main challenges to sustainability in India?", a: "Sustainable Economic Development is development that meets the needs of the present generation without compromising the ability of future generations to meet their own needs (Brundtland Commission definition, 1987). It balances economic growth with environmental protection and social equity.\n\nChallenges to sustainability in India:\n1. Overexploitation of natural resources: Rapid industrialisation and population growth are depleting forests, minerals, groundwater, and biodiversity at unsustainable rates.\n2. Environmental pollution: Air pollution in cities (especially Delhi), water pollution of rivers (Ganga, Yamuna), and soil degradation from chemical farming threaten human health and ecological systems.\n3. Global warming and climate change: India is highly vulnerable to climate change — erratic monsoons, rising sea levels, and extreme weather events threaten agriculture and coastal communities.\n4. Energy security: India is heavily dependent on fossil fuels (coal, oil). Transitioning to renewables is necessary but expensive and slow." }
+              ]
             },
             {
-              id: "eco-neighbours",
-              unit: "Unit 8",
-              title: "Development Experience of India: Comparison with Neighbours",
-              marks: 8,
-              topics: [
-                "India and Pakistan",
-                "India and China",
-                "Economic growth comparison",
-                "Population indicators",
-                "Sectoral development",
-                "Human Development Indicators"
-              ],
-              boardMoves: ["compare indicators", "sectoral shifts", "HDI reading", "China-Pakistan-India contrasts"],
-              hook: "Comparing neighbours turns statistics into stories of choices, speed, and trade-offs."
+              id: "eco-neighbours", unit: "Unit 8", title: "Development Experience: Comparison with Neighbours", marks: 8,
+              hook: "Comparing neighbours turns statistics into stories of choices, speed, and trade-offs.",
+              topics: ["India, Pakistan, and China at independence", "Economic growth comparison", "Population and human development indicators", "China's economic model", "Pakistan's challenges"],
+              boardMoves: ["HDI comparison table", "China's growth strategy", "India vs China sectoral comparison", "common challenges"],
+              pastYearQs: [
+                { year: 2024, marks: 4, q: "Compare the development strategies of India and China after independence. Which country performed better and why?", a: "India and China both became independent nations around the same time (India in 1947, China in 1949) and started with similar levels of poverty and underdevelopment.\n\nIndia's strategy: India chose a mixed economy with democratic planning. Five Year Plans guided public investment, while private enterprise was permitted but regulated. India focused on import substitution industrialisation and self-reliance.\n\nChina's strategy: China followed a communist command economy under Mao Zedong, with state control of all resources. After Mao's death, Deng Xiaoping introduced market reforms (1978 onwards) — Special Economic Zones, foreign direct investment, and export-led growth — while maintaining Communist Party control.\n\nChina outperformed India significantly:\n- China's GDP growth averaged 8-10% for decades; India averaged 5-6%.\n- China lifted over 800 million people out of poverty in 40 years — the fastest poverty reduction in history.\n- China has higher HDI, better infrastructure, higher per capita income, and lower infant mortality.\n\nReasons for China's faster growth: Decisive economic reforms, massive investment in infrastructure, high savings and investment rates, export-oriented manufacturing, and strong government capacity to implement policy." }
+              ]
             }
           ]
         }
@@ -686,281 +308,77 @@ window.CBSE_STUDY_DATA = {
       name: "Political Science",
       code: "028",
       icon: "PO",
+      color: "#f59e0b",
+      colorSoft: "#fef3c7",
       theoryMarks: 80,
       practicalMarks: 20,
       durationMinutes: 180,
       officialUrl: "https://cbseacademic.nic.in/web_material/CurriculumMain27/SecPart2/PoliticalScience_SecP2_2026-27.pdf",
       samplePaperUrl: "https://cbseacademic.nic.in/web_material/SQP/ClassXII_2025_26/PolSci-SQP.pdf",
-      pattern: {
-        basis: "CBSE 2026-27 curriculum, including the Class XII political science question paper design.",
-        questionMarks: [1, 2, 4, 6],
-        requestedMarksSupported: [1, 2, 3, 4, 5, 6],
-        sections: [
-          "12 objective questions",
-          "6 short-answer questions of 2 marks",
-          "5 short-answer questions of 4 marks",
-          "3 passage, map, or cartoon-based questions of 4 marks",
-          "4 long-answer questions of 6 marks"
-        ],
-        competencies: [
-          { name: "Knowledge and remembering", weight: 27.5 },
-          { name: "Understanding", weight: 30 },
-          { name: "Applying", weight: 27.5 },
-          { name: "Analysis and evaluation", weight: 15 }
-        ]
-      },
+      pattern: { basis: "CBSE 2026-27 curriculum plus latest Political Science sample paper.", questionMarks: [1, 2, 4, 6], sections: ["12 objective 1-mark", "6 short answer 2-mark", "5 short answer 4-mark", "3 passage/cartoon 4-mark", "4 long answer 6-mark"] },
       books: [
         {
-          id: "pol-world",
-          title: "Contemporary World Politics",
-          publisher: "NCERT",
+          id: "pol-world", title: "Contemporary World Politics", publisher: "NCERT",
           chapters: [
             {
-              id: "pol-bipolarity",
-              unit: "Part A Chapter 1",
-              title: "The End of Bipolarity",
-              marks: 6,
-              topics: [
-                "The Soviet system",
-                "Gorbachev and disintegration",
-                "Causes and consequences of Soviet disintegration",
-                "Shock therapy",
-                "New entities in world politics",
-                "India's relations with Russia and post-communist countries"
-              ],
-              boardMoves: ["timeline", "shock therapy effects", "Russia relations", "unipolar world"],
-              hook: "When bipolarity ended, the world map stayed still but world power moved sharply."
+              id: "pol-bipolarity", unit: "Part A Ch.1", title: "The End of Bipolarity", marks: 6,
+              hook: "When bipolarity ended, the world map stayed still but world power moved sharply.",
+              topics: ["The Soviet system and its features", "Gorbachev's reforms (glasnost, perestroika)", "Causes of Soviet disintegration", "Shock therapy and its consequences", "India-Russia relations post-1991"],
+              boardMoves: ["causes of disintegration", "shock therapy consequences", "unipolar world implications", "India-Russia relations"],
+              pastYearQs: [
+                { year: 2024, marks: 4, q: "Explain any four consequences of the disintegration of the Soviet Union for world politics.", a: "The disintegration of the Soviet Union in 1991 had far-reaching consequences:\n\n1. End of Cold War and bipolarity: The US-Soviet rivalry that had dominated world politics since 1945 ended. The world moved from a bipolar order to a unipolar world with the USA as the sole superpower.\n\n2. Emergence of new states: 15 new sovereign states emerged from the former USSR, including Russia, Ukraine, Belarus, the Baltic states (Estonia, Latvia, Lithuania), and Central Asian republics. Each had to build new political and economic systems.\n\n3. Rise of US hegemony: Without the Soviet counterbalance, American power, culture, economy, and military became dominant globally. US foreign policy became more assertive.\n\n4. Shock therapy and economic chaos: The newly independent states abandoned communist economies and adopted capitalism rapidly (shock therapy). This caused massive unemployment, collapse of social services, currency crises, and rise of organised crime — especially in Russia." },
+                { year: 2023, marks: 3, q: "What was 'Shock Therapy'? What were its two main consequences in Russia?", a: "Shock Therapy was the model of rapid economic transition from a communist command economy to a capitalist market economy, advocated by the World Bank and IMF for post-Soviet states in the 1990s. It involved immediate and drastic measures: abolishing state control, privatising state enterprises, opening up to foreign trade, and removing price controls — all at once, like ripping off a bandage.\n\nTwo main consequences in Russia:\n1. Economic collapse: The Russian currency (rouble) collapsed, inflation skyrocketed, and GDP fell drastically. State-owned industries were sold cheaply and taken over by politically connected 'oligarchs,' creating massive inequality. Unemployment rose sharply as uncompetitive industries shut down.\n2. Social crisis: The withdrawal of the state from healthcare, education, and social security devastated the population. Life expectancy fell, crime and corruption surged, and millions fell into poverty virtually overnight." }
+              ]
             },
             {
-              id: "pol-centres-power",
-              unit: "Part A Chapter 2",
-              title: "Contemporary Centres of Power",
-              marks: 6,
-              topics: [
-                "European Union",
-                "ASEAN",
-                "Rise of China",
-                "Japan and South Korea as emerging powers"
-              ],
-              boardMoves: ["EU versus ASEAN", "China's rise", "India-China relations", "regional organisations"],
-              hook: "Power is no longer a single throne; it is a crowded table."
+              id: "pol-south-asia", unit: "Part A Ch.3", title: "Contemporary South Asia", marks: 6,
+              hook: "South Asia is a family group chat — close, complicated, and impossible to ignore.",
+              topics: ["Pakistan — military and democracy", "Bangladesh", "Nepal — monarchy to democracy", "Sri Lanka — ethnic conflict", "India-Pakistan relations", "SAARC"],
+              boardMoves: ["country case comparison", "SAARC purpose and limitations", "conflict resolution", "democratic transitions"],
+              pastYearQs: [
+                { year: 2023, marks: 4, q: "Describe the main features of India-Pakistan relations since independence. What are the major areas of conflict?", a: "India-Pakistan relations have been characterised by deep mistrust, four wars, and intermittent attempts at normalisation since partition in 1947.\n\nMajor areas of conflict:\n1. Kashmir dispute: The most central issue. Both countries claim Jammu and Kashmir. Three of the four India-Pakistan wars (1947, 1965, 1999 Kargil) were directly or indirectly related to Kashmir. The Line of Control (LoC) serves as the de facto border.\n2. Cross-border terrorism: India accuses Pakistan of harbouring and supporting terrorist groups that operate in India (e.g., Lashkar-e-Taiba — Mumbai 2008 attacks). Pakistan denies state sponsorship.\n3. Nuclear arms race: Both countries conducted nuclear tests in 1998, raising the stakes of any conflict significantly. The region has become a nuclear flashpoint.\n4. Water sharing: The Indus Waters Treaty (1960) has largely held, but disputes over river waters continue.\n\nPeace attempts: Simla Agreement (1972), Lahore Declaration (1999), Composite Dialogue, and Bus Diplomacy have been attempted but repeatedly derailed by terrorist attacks and political changes." }
+              ]
             },
             {
-              id: "pol-south-asia",
-              unit: "Part A Chapter 3",
-              title: "Contemporary South Asia",
-              marks: 6,
-              topics: [
-                "Military and democracy in Pakistan and Bangladesh",
-                "Monarchy and democracy in Nepal",
-                "Ethnic conflict and democracy in Sri Lanka",
-                "India-Pakistan conflicts",
-                "India and its neighbours",
-                "Peace and cooperation"
-              ],
-              boardMoves: ["country comparison", "SAARC", "conflict causes", "democratic transitions"],
-              hook: "South Asia is a family group chat: close, complicated, and impossible to ignore."
-            },
-            {
-              id: "pol-international-organisations",
-              unit: "Part A Chapter 4",
-              title: "International Organizations",
-              marks: 6,
-              topics: [
-                "United Nations",
-                "UN structures and agencies",
-                "Security Council",
-                "India and permanent membership",
-                "Reform of international organisations"
-              ],
-              boardMoves: ["UN organs", "Security Council reform", "India's claim", "agency roles"],
-              hook: "International organisations are the world's meeting rooms: imperfect, necessary, and always negotiated."
-            },
-            {
-              id: "pol-security",
-              unit: "Part A Chapter 5",
-              title: "Security in the Contemporary World",
-              marks: 6,
-              topics: [
-                "Traditional security",
-                "Non-traditional security",
-                "Cooperative security",
-                "Terrorism",
-                "Human security",
-                "Global poverty",
-                "Health epidemics"
-              ],
-              boardMoves: ["traditional versus non-traditional", "cooperative security", "examples", "human security"],
-              hook: "Security is no longer only borders and armies; it includes hunger, health, fear, and dignity."
-            },
-            {
-              id: "pol-environment",
-              unit: "Part A Chapter 6",
-              title: "Environment and Natural Resources",
-              marks: 6,
-              topics: [
-                "Environmental concerns in global politics",
-                "Earth Summit",
-                "Agenda 21",
-                "Global commons",
-                "Common but differentiated responsibilities",
-                "Resource geopolitics",
-                "Indigenous people"
-              ],
-              boardMoves: ["summits", "CBDR", "global commons", "resource politics"],
-              hook: "Environmental politics asks who used the planet, who pays, and who gets heard."
-            },
-            {
-              id: "pol-globalisation",
-              unit: "Part A Chapter 7",
-              title: "Globalisation",
-              marks: 4,
-              topics: [
-                "Meaning and causes of globalisation",
-                "Political consequences",
-                "Economic consequences",
-                "Cultural consequences",
-                "India and globalisation",
-                "Resistance to globalisation"
-              ],
-              boardMoves: ["consequence categories", "welfare state", "cultural impact", "India examples"],
-              hook: "Globalisation is the world's shortcut key: faster flows, bigger choices, sharper inequalities."
+              id: "pol-globalisation", unit: "Part A Ch.7", title: "Globalisation", marks: 4,
+              hook: "Globalisation is the world's shortcut key — faster flows, bigger choices, sharper inequalities.",
+              topics: ["Meaning and causes of globalisation", "Political consequences", "Economic consequences", "Cultural consequences", "India and globalisation", "Resistance to globalisation"],
+              boardMoves: ["consequence categories", "welfare state impact", "cultural homogenisation", "India-globalisation examples"],
+              pastYearQs: [
+                { year: 2024, marks: 4, q: "Explain the political and cultural consequences of globalisation.", a: "Political consequences of globalisation:\n1. Decline of state sovereignty: Globalisation has reduced the ability of governments to make independent decisions. International organisations (WTO, IMF), multinational corporations, and global treaties constrain what governments can do on economic policy.\n2. Spread of democracy: Global communication and the demonstration effect have promoted democratic values and human rights norms worldwide, contributing to waves of democratisation.\n3. Rise of global governance institutions: Issues like climate change, terrorism, and pandemics cannot be solved by individual states — they require multilateral cooperation, strengthening bodies like the UN, WTO, and WHO.\n\nCultural consequences:\n1. Cultural homogenisation: Globalisation spreads a dominant (largely American) culture — fast food chains, Hollywood, social media platforms, and English as a global language threaten local cultures and languages.\n2. Cultural resistance: In response, many communities assert their cultural identity more strongly — local music, language movements, and 'glocalization' (global + local) emerge.\n3. Cultural diversity: Globalisation also allows people worldwide to access diverse cultures, foods, art, and ideas that they could not before." }
+              ]
             }
           ]
         },
         {
-          id: "pol-india",
-          title: "Politics in India Since Independence",
-          publisher: "NCERT",
+          id: "pol-india", title: "Politics in India Since Independence", publisher: "NCERT",
           chapters: [
             {
-              id: "pol-nation-building",
-              unit: "Part B Chapter 1",
-              title: "Challenges of Nation-Building",
-              marks: 6,
-              topics: [
-                "Partition and its consequences",
-                "Integration of princely states",
-                "Reorganisation of states",
-                "Linguistic states",
-                "Manipur accession"
-              ],
-              boardMoves: ["integration strategy", "linguistic reorganisation", "partition impact", "map skills"],
-              hook: "Nation-building was not a ribbon-cutting ceremony; it was negotiation under pressure."
+              id: "pol-nation-building", unit: "Part B Ch.1", title: "Challenges of Nation-Building", marks: 6,
+              hook: "Nation-building was not a ribbon-cutting ceremony — it was negotiation under pressure.",
+              topics: ["Partition and its consequences", "Integration of princely states — Sardar Patel's role", "Linguistic reorganisation of states", "States Reorganisation Commission 1953"],
+              boardMoves: ["partition consequences", "integration strategies — merger, accession, military action", "linguistic states argument", "map skills"],
+              pastYearQs: [
+                { year: 2023, marks: 4, q: "Explain the major challenges India faced in nation-building immediately after independence.", a: "India faced three major challenges after independence in 1947:\n\n1. The challenge of shaping a united nation from a country of enormous diversity: India had hundreds of languages, dozens of religions, multiple castes, and regional identities that could easily fragment the new nation. The Constitution's federal structure, fundamental rights, and a common citizenship helped hold this together.\n\n2. The challenge of integrating the princely states: At independence, India consisted of British India and 565 princely states that were technically free to choose their future. Sardar Vallabhbhai Patel, as Home Minister, used persuasion, diplomatic pressure, and where necessary military action (as in Hyderabad) to integrate almost all states into the Indian Union.\n\n3. The challenge of partition: The partition of British India into India and Pakistan was accompanied by the largest forced migration in human history — 10-15 million people displaced — and massive communal violence that killed an estimated 5-10 lakh people. Managing refugees, preventing communal riots, and building communal harmony was an urgent challenge for the new government." }
+              ]
             },
             {
-              id: "pol-one-party",
-              unit: "Part B Chapter 2",
-              title: "Era of One-Party Dominance",
-              marks: 4,
-              topics: [
-                "Congress dominance",
-                "Opposition parties",
-                "Communist Party of India",
-                "Bharatiya Jana Sangh",
-                "Socialist Party",
-                "Swatantra Party"
-              ],
-              boardMoves: ["one-party dominance versus one-party system", "party matching", "opposition role"],
-              hook: "Dominance is not the same as absence of opposition; CBSE loves that distinction."
+              id: "pol-democratic-order", unit: "Part B Ch.6", title: "The Crisis of Democratic Order", marks: 4,
+              hook: "Democracy is tested most clearly when power is tempted to silence disagreement.",
+              topics: ["JP Movement and Total Revolution", "Emergency 1975 — causes and provisions", "Suspension of civil liberties", "1977 elections and lessons"],
+              boardMoves: ["Emergency causes", "rights suspended", "1977 outcome", "democratic lessons"],
+              pastYearQs: [
+                { year: 2024, marks: 4, q: "What was the Emergency of 1975? What were its main features and lessons for Indian democracy?", a: "The Emergency (June 1975 – March 1977) was declared by Prime Minister Indira Gandhi under Article 352 of the Constitution, citing internal disturbance as a threat to national security. It was the most severe test of Indian democracy.\n\nMain features:\n1. Suspension of civil liberties: Fundamental Rights under Articles 14, 19, 21, and 22 were suspended. Citizens could not move courts against illegal detention.\n2. Preventive detention: Thousands of political leaders, trade unionists, journalists, and activists were arrested without trial under MISA (Maintenance of Internal Security Act) — including opposition leaders like JP Narayan, Atal Bihari Vajpayee, and L.K. Advani.\n3. Press censorship: Newspapers were censored; the government had to approve all content before publication.\n4. Postponement of elections: The Lok Sabha elections due in 1976 were postponed.\n\nLessons:\n1. Constitutional safeguards alone are not enough — democratic values must be internalised by political actors.\n2. An independent judiciary and free press are vital checks on executive power.\n3. Citizens can defeat authoritarianism — the 1977 elections saw the Congress defeated for the first time since independence, showing the resilience of India's democratic spirit." }
+              ]
             },
             {
-              id: "pol-planned-development",
-              unit: "Part B Chapter 3",
-              title: "Politics of Planned Development",
-              marks: 2,
-              topics: [
-                "Planning Commission",
-                "Early initiatives for development",
-                "Public sector",
-                "Agriculture and industry debate",
-                "Development model"
-              ],
-              boardMoves: ["planning goals", "model debate", "NITI Aayog reference", "early development"],
-              hook: "Planning is politics wearing an economics coat."
-            },
-            {
-              id: "pol-external-relations",
-              unit: "Part B Chapter 4",
-              title: "India's External Relations",
-              marks: 6,
-              topics: [
-                "Nehru's foreign policy",
-                "Non-alignment",
-                "Afro-Asian unity",
-                "India-China relations",
-                "India-Pakistan relations",
-                "Nuclear policy"
-              ],
-              boardMoves: ["non-alignment", "war and diplomacy", "foreign policy aims", "China timeline"],
-              hook: "Foreign policy is how a country says who it is when everyone else is watching."
-            },
-            {
-              id: "pol-congress-system",
-              unit: "Part B Chapter 5",
-              title: "Challenges to and Restoration of the Congress System",
-              marks: 4,
-              topics: [
-                "Political succession",
-                "Fourth general elections",
-                "Congress split",
-                "Presidential election 1969",
-                "Restoration after 1971"
-              ],
-              boardMoves: ["chronology", "Congress split", "coalitions", "leadership changes"],
-              hook: "This chapter is a political plot twist: dominance shakes, splits, and returns."
-            },
-            {
-              id: "pol-democratic-order",
-              unit: "Part B Chapter 6",
-              title: "The Crisis of Democratic Order",
-              marks: 4,
-              topics: [
-                "Emergency",
-                "JP movement",
-                "Total Revolution",
-                "Civil liberties",
-                "1977 election",
-                "Lessons of Emergency"
-              ],
-              boardMoves: ["Emergency causes", "rights impact", "1977 outcomes", "democratic lessons"],
-              hook: "Democracy is tested most clearly when power is tempted to silence disagreement."
-            },
-            {
-              id: "pol-regional-aspirations",
-              unit: "Part B Chapter 7",
-              title: "Regional Aspirations",
-              marks: 6,
-              topics: [
-                "Jammu and Kashmir",
-                "Punjab",
-                "The Northeast",
-                "Demand for autonomy",
-                "Secessionist movements",
-                "Movements against outsiders",
-                "National integration"
-              ],
-              boardMoves: ["case comparison", "autonomy", "integration", "regional demands"],
-              hook: "Regional aspirations are not always anti-national; often they ask how belonging should feel."
-            },
-            {
-              id: "pol-recent-developments",
-              unit: "Part B Chapter 8",
-              title: "Recent Developments in Indian Politics",
-              marks: 8,
-              topics: [
-                "Context of the 1990s",
-                "Coalition era",
-                "Alliance politics",
-                "Mandal implementation",
-                "Communalism, secularism, and democracy",
-                "Ayodhya issue",
-                "Emergence of new consensus",
-                "Lok Sabha elections 2004-2019",
-                "Growth of BJP"
-              ],
-              boardMoves: ["coalition politics", "Mandal", "new consensus", "BJP rise"],
-              hook: "The 1990s rewired Indian politics: caste, coalitions, economy, identity, and new party systems."
+              id: "pol-recent-developments", unit: "Part B Ch.8", title: "Recent Developments in Indian Politics", marks: 8,
+              hook: "The 1990s rewired Indian politics — caste, coalitions, economy, identity, and new party systems.",
+              topics: ["Coalition era", "Mandal Commission and implementation", "Communalism and secularism", "Ayodhya issue", "Rise of BJP", "Lok Sabha elections 2004-2019"],
+              boardMoves: ["Mandal consequences", "coalition politics features", "new social consensus", "BJP's rise factors"],
+              pastYearQs: [
+                { year: 2023, marks: 6, q: "Describe the major political developments in India during the 1990s. How did this decade reshape Indian politics?", a: "The 1990s was a transformative decade for Indian politics, reshaping the party system, social coalitions, and economic direction.\n\n1. End of Congress dominance and rise of coalition politics: The 1989 elections ended Congress's single-party dominance. From 1989 to 2014, every government at the Centre was a coalition — National Front, United Front, NDA, and UPA. This changed the nature of governance, requiring negotiation among regional parties.\n\n2. Mandal Commission implementation (1990): V.P. Singh's government implemented the Mandal Commission's recommendation of 27% reservation for OBCs in government jobs. This triggered massive anti-Mandal protests but fundamentally reconfigured Indian politics along caste lines. OBC parties emerged as major political forces in states like Bihar and UP.\n\n3. Rise of Hindu nationalism and the Ayodhya issue: The BJP's Ram Janmabhoomi movement and the demolition of the Babri Masjid (December 1992) created deep communal divisions. The BJP rose from 2 seats in 1984 to 120 in 1991 and formed the government in 1999.\n\n4. Economic liberalisation (1991): The Congress government under Narasimha Rao and Finance Minister Manmohan Singh launched market reforms — ending the License Raj, opening trade, and attracting foreign investment. This created a new middle class and changed economic expectations from politics.\n\n5. New social consensus by the late 1990s: Despite ideological differences, most parties accepted economic reforms, democracy, and federalism as non-negotiable. Coalition partners — even rivals — cooperated in governance." }
+              ]
             }
           ]
         }
@@ -971,235 +389,101 @@ window.CBSE_STUDY_DATA = {
       name: "English Core",
       code: "301",
       icon: "EN",
+      color: "#ef4444",
+      colorSoft: "#fee2e2",
       theoryMarks: 80,
       practicalMarks: 20,
       durationMinutes: 180,
       officialUrl: "https://cbseacademic.nic.in/web_material/CurriculumMain27/SecPart2/English_core_SecP2_2026-27.pdf",
       samplePaperUrl: "https://cbseacademic.nic.in/web_material/SQP/ClassXII_2025_26/EnglishCore-SQP.pdf",
-      pattern: {
-        basis: "CBSE 2026-27 curriculum and the current official English Core sample paper.",
-        questionMarks: [1, 2, 4, 5, 6, 12],
-        requestedMarksSupported: [1, 2, 3, 4, 5, 6],
-        sections: [
-          "Section A: Reading Skills, 22 marks",
-          "Section B: Creative Writing Skills, 18 marks",
-          "Section C: Literature, 40 marks",
-          "Internal Assessment: Listening, speaking, and project work"
-        ],
-        competencies: [
-          { name: "Reading and inference", weight: 27.5 },
-          { name: "Writing format and expression", weight: 22.5 },
-          { name: "Literary analysis and evaluation", weight: 50 }
-        ]
-      },
+      pattern: { basis: "CBSE 2026-27 curriculum.", questionMarks: [2, 4, 5, 6, 12], sections: ["Section A: Reading (22 marks)", "Section B: Writing (18 marks)", "Section C: Literature (40 marks)"] },
       books: [
         {
-          id: "english-flamingo",
-          title: "Flamingo",
-          publisher: "NCERT",
+          id: "english-flamingo", title: "Flamingo", publisher: "NCERT",
           chapters: [
             {
-              id: "eng-last-lesson",
-              unit: "Prose",
-              title: "The Last Lesson",
-              marks: 3,
-              topics: ["language and identity", "regret", "patriotism", "colonial pressure", "teacher-student bond"],
-              boardMoves: ["theme analysis", "character shift", "symbolism of language", "extract inference"],
-              hook: "A classroom becomes a country in miniature."
+              id: "eng-last-lesson", unit: "Prose", title: "The Last Lesson", marks: 5,
+              hook: "A classroom becomes a country in miniature — and a language becomes a homeland.",
+              topics: ["Language and national identity", "Colonialism and its cultural impact", "Regret and lost opportunity", "Teacher-student relationship", "Symbolism"],
+              boardMoves: ["theme analysis", "character of M. Hamel", "symbolism of French language", "extract-based inference"],
+              pastYearQs: [
+                { year: 2024, marks: 4, q: "How does 'The Last Lesson' highlight the importance of one's mother tongue? What does M. Hamel's lesson teach us?", a: "'The Last Lesson' by Alphonse Daudet powerfully shows that a language is not merely a tool of communication — it is the soul of a nation's identity.\n\nThe story is set during the Franco-Prussian War. The people of Alsace have been ordered by the Prussian government to replace French with German in schools. M. Hamel conducts his last French lesson with deep emotion and dignity.\n\nImportance of mother tongue:\n1. Language as identity: M. Hamel tells his students that when a people are enslaved, their language is the key to their prison — as long as they hold onto it, they have the means to reclaim their freedom and identity.\n2. Regret for neglect: Franz and the villagers realise, too late, how much they have neglected French — attending dances rather than school. The language they took for granted is now being taken away.\n3. Colonialism's cultural violence: The Prussians do not merely conquer territory — they erase language and culture. This is a deeper form of subjugation.\n\nM. Hamel's lesson teaches: We must not neglect our cultural heritage. We often value things only when we lose them. Language connects us to our history, literature, and collective identity." },
+                { year: 2023, marks: 4, q: "Describe the character of M. Hamel as depicted in 'The Last Lesson'.", a: "M. Hamel is the French schoolteacher who teaches what turns out to be the last lesson in French in the village school of Alsace.\n\nCharacter traits:\n1. Dedicated and responsible teacher: On his last day, M. Hamel comes dressed in his best clothes — the coat he wore only on inspection days and prize days. He teaches with patience and deep emotion, without any anger.\n2. Patriotic: M. Hamel's love for France and the French language is profound. He tells the students that French is the most beautiful language in the world — the clearest and most logical — and urges them to guard and never forget it.\n3. Self-aware and regretful: In a surprising moment of honesty, M. Hamel admits that he too is guilty — he sometimes gave students time off to water his garden, and sent them fishing when he wished to. He shares the collective guilt of the Alsatian community.\n4. Dignified in defeat: At the end of the lesson, unable to speak, M. Hamel writes 'Vive La France!' on the board and dismisses class. This act of quiet dignity in the face of conquest is deeply moving." }
+              ]
             },
             {
-              id: "eng-lost-spring",
-              unit: "Prose",
-              title: "Lost Spring",
-              marks: 3,
-              topics: ["child labour", "poverty", "dreams and deprivation", "social injustice", "reportage style"],
-              boardMoves: ["case comparison", "author's tone", "social message", "title significance"],
-              hook: "The title hurts because childhood is treated like a season some children never get."
+              id: "eng-aunt-jennifer", unit: "Poetry", title: "Aunt Jennifer's Tigers", marks: 5,
+              hook: "Her hands tremble under the weight of a ring, but her tigers walk fearless forever.",
+              topics: ["Patriarchy and oppression", "Art as freedom and expression", "Symbolism — tigers, ring, needle", "Contrast — Aunt Jennifer vs the tigers", "Gender critique"],
+              boardMoves: ["symbolism of tigers", "wedding band as oppression", "contrast: tigers vs aunt", "feminist reading"],
+              pastYearQs: [
+                { year: 2024, marks: 4, q: "What do Aunt Jennifer's tigers symbolise? What does the poem say about the constraints women face under patriarchy?", a: "In Adrienne Rich's poem, the tigers Aunt Jennifer embroiders represent everything she is not in real life: fearless, free, confident, and unafraid of the men beneath the trees.\n\nSymbolism of tigers:\n- The tigers are bright, chivalric, and do not fear the men beneath the tree — they are symbols of freedom, power, and liberation that Aunt Jennifer herself cannot possess in her life.\n- They will continue to prance even after Aunt Jennifer is dead, suggesting that art outlives oppression — the creative imagination can transcend the constraints of life.\n\nPatriarchal constraints on Aunt Jennifer:\n1. The 'massive weight of Uncle's wedding band' sits heavily on her hand — the ring is not a symbol of love but of ownership and burden. Marriage has oppressed rather than liberated her.\n2. Her hands are terrified and flutter — she cannot even create freely without her oppression showing in her body.\n3. Ordeals she was mastered by: Aunt Jennifer has been dominated, not loved — the word 'mastered' deliberately echoes domination and control.\n\nThe tragic irony: Aunt Jennifer creates fierce, fearless tigers even as she herself lives in fear — her art expresses the freedom her life denies her." },
+                { year: 2022, marks: 2, q: "What is the significance of the phrase 'massive weight of Uncle's wedding band' in 'Aunt Jennifer's Tigers'?", a: "The phrase is rich with symbolic meaning. A wedding band is traditionally a symbol of love and commitment, but here it is described as 'massive' and a 'weight' — turning it into a symbol of oppression and burden.\n\nIt suggests that marriage, as experienced by Aunt Jennifer, is not a partnership of equals but a source of domination. The ring represents the heavy, stifling power of patriarchy that has crushed Aunt Jennifer's spirit and freedom. Even as she creates fierce, fearless tigers through her art, the ring on her hand reveals her inability to be free herself." }
+              ]
             },
             {
-              id: "eng-deep-water",
-              unit: "Prose",
-              title: "Deep Water",
-              marks: 3,
-              topics: ["fear", "trauma", "willpower", "gradual training", "self-mastery"],
-              boardMoves: ["fear overcoming", "narrative sequence", "lesson of courage", "personal transformation"],
-              hook: "The pool is smaller than the fear it creates."
+              id: "eng-keeping-quiet", unit: "Poetry", title: "Keeping Quiet", marks: 4,
+              hook: "The poem asks the world to pause before it mistakes motion for meaning.",
+              topics: ["Silence and introspection", "Anti-war and anti-violence message", "Human unity", "Counting to twelve — symbolism", "Life-affirming message"],
+              boardMoves: ["central message", "what counting to twelve means", "what the poet wants us to stop doing", "connection to nature"],
+              pastYearQs: [
+                { year: 2023, marks: 4, q: "What is the central message of Pablo Neruda's 'Keeping Quiet'? What does he want humanity to reflect upon?", a: "Pablo Neruda's 'Keeping Quiet' is a plea for a moment of universal stillness — a pause in which humanity can reflect on the destruction, violence, and meaningless busyness it has created.\n\nCentral message:\nNeruda urges all of humanity to stop — stop all activity, all noise, all movement — for a single moment of silence. He believes that if we pause, we will recognise the harm we are doing to ourselves and to the Earth.\n\nWhat he wants us to reflect upon:\n1. End of violence and wars: He wants the man who prepares weapons of war and the man who fights to put on clean clothes and walk with his brothers. War is senseless destruction.\n2. End of exploitation of nature: He wants those who poison seas and those who cut trees to stop and reflect on the damage they cause.\n3. Our own mortality and inner lives: In rushing through life, we forget who we are. Silence would allow us to find ourselves and recognise our connection to all living things.\n4. Life over death: The poem ends with a powerful contrast — the Earth remains alive even in apparent stillness, just as a tree 'lifts its branches to the light' even in winter. Life does not require noise.\n\nNeruda makes clear he does not advocate passivity or laziness — just a moment of conscious reflection before action." }
+              ]
             },
             {
-              id: "eng-rattrap",
-              unit: "Prose",
-              title: "The Rattrap",
-              marks: 3,
-              topics: ["temptation", "kindness", "redemption", "human dignity", "metaphor of the rattrap"],
-              boardMoves: ["metaphor", "character change", "Edla's role", "moral insight"],
-              hook: "The world is a trap only until someone treats you as worthy of trust."
-            },
-            {
-              id: "eng-indigo",
-              unit: "Prose",
-              title: "Indigo",
-              marks: 3,
-              topics: ["Champaran", "civil disobedience", "leadership", "self-reliance", "justice"],
-              boardMoves: ["Gandhi's methods", "peasants' struggle", "leadership qualities", "historical context"],
-              hook: "A local injustice becomes a lesson in national courage."
-            },
-            {
-              id: "eng-poets-pancakes",
-              unit: "Prose",
-              title: "Poets and Pancakes",
-              marks: 3,
-              topics: ["Gemini Studios", "satire", "film culture", "make-up department", "literary irony"],
-              boardMoves: ["satirical tone", "character sketches", "studio culture", "humour"],
-              hook: "Behind the glamour sits a busy factory of vanity, wit, and hierarchy."
-            },
-            {
-              id: "eng-interview",
-              unit: "Prose",
-              title: "The Interview",
-              marks: 3,
-              topics: ["interviews as a genre", "public image", "Umberto Eco", "media culture", "craft of writing"],
-              boardMoves: ["views on interviews", "Eco's method", "interstices", "genre analysis"],
-              hook: "An interview is both a window and a stage."
-            },
-            {
-              id: "eng-going-places",
-              unit: "Prose",
-              title: "Going Places",
-              marks: 3,
-              topics: ["adolescent dreams", "fantasy and reality", "class", "family expectations", "Sophie"],
-              boardMoves: ["fantasy versus reality", "character contrast", "class aspiration", "ending interpretation"],
-              hook: "Dreams can be wings, but they can also become fog."
-            },
-            {
-              id: "eng-mother-sixty-six",
-              unit: "Poetry",
-              title: "My Mother at Sixty-Six",
-              marks: 3,
-              topics: ["ageing", "separation anxiety", "imagery", "contrast", "fear of loss"],
-              boardMoves: ["poetic devices", "image contrast", "speaker's emotion", "ending smile"],
-              hook: "A car ride becomes a quiet confrontation with time."
-            },
-            {
-              id: "eng-keeping-quiet",
-              unit: "Poetry",
-              title: "Keeping Quiet",
-              marks: 3,
-              topics: ["silence", "introspection", "peace", "human unity", "anti-violence"],
-              boardMoves: ["central idea", "symbolism of silence", "counting to twelve", "life-affirming message"],
-              hook: "The poem asks the world to pause before it mistakes motion for meaning."
-            },
-            {
-              id: "eng-thing-beauty",
-              unit: "Poetry",
-              title: "A Thing of Beauty",
-              marks: 3,
-              topics: ["beauty", "nature", "healing", "immortality", "hope"],
-              boardMoves: ["beauty as solace", "imagery", "metaphor", "theme"],
-              hook: "Beauty is shown as a small permanent repair in a tired world."
-            },
-            {
-              id: "eng-roadside-stand",
-              unit: "Poetry",
-              title: "A Roadside Stand",
-              marks: 3,
-              topics: ["rural poverty", "urban indifference", "false promises", "dignity", "economic inequality"],
-              boardMoves: ["contrast", "tone", "social criticism", "speaker's conflict"],
-              hook: "The stand sells more than goods; it sells a hope that passing cars ignore."
-            },
-            {
-              id: "eng-aunt-jennifer",
-              unit: "Poetry",
-              title: "Aunt Jennifer's Tigers",
-              marks: 3,
-              topics: ["patriarchy", "freedom", "art as expression", "symbolism", "fear and courage"],
-              boardMoves: ["symbolism of tigers", "wedding band", "contrast", "gender critique"],
-              hook: "Her hands tremble, but her tigers do not."
+              id: "eng-rattrap", unit: "Prose", title: "The Rattrap", marks: 4,
+              hook: "The world is a trap — until someone treats you as worthy of trust.",
+              topics: ["Redemption through kindness", "Metaphor of the rattrap", "Character of Edla Willmansson", "Human dignity", "Temptation vs goodness"],
+              boardMoves: ["rattrap metaphor", "Edla's role in redemption", "peddler's transformation", "moral of the story"],
+              pastYearQs: [
+                { year: 2022, marks: 4, q: "Describe the character of Edla Willmansson in 'The Rattrap'. How does she bring about a change in the peddler?", a: "Edla Willmansson is the daughter of the ironmaster and the moral heart of Selma Lagerlöf's story. She represents compassion, empathy, and genuine human kindness.\n\nCharacter traits:\n1. Perceptive and empathetic: From the moment she meets the peddler, Edla sees through his disguise. She notices that he is frightened and does not feel at ease — unlike her father, who sees only what he wants to see.\n2. Genuinely kind without expectation: Even after discovering the peddler is not her father's old friend, Edla insists he stays for Christmas, because he had been promised a day of peace and joy. She honours the promise made to a stranger.\n3. Non-judgmental: She treats the peddler with respect and dignity, not pity — she sees a human being, not a criminal or a failure.\n\nHow she changes the peddler:\nEdla's unconditional kindness is what the peddler has never experienced. His philosophy is that the world is a rattrap — a trap that lures with bait and then closes. Edla's generosity breaks this cynical worldview. He leaves the Christmas gift and a letter, addresses Edla as 'a real Christmas lady,' returns the money he stole, and signs himself as 'Captain von Stahle' — reclaiming his lost dignity and identity.\n\nEdla's kindness redeems him — not by lecturing but by believing in his goodness." }
+              ]
             }
           ]
         },
         {
-          id: "english-vistas",
-          title: "Vistas",
-          publisher: "NCERT",
+          id: "english-vistas", title: "Vistas", publisher: "NCERT",
           chapters: [
             {
-              id: "eng-third-level",
-              unit: "Supplementary Reader",
-              title: "The Third Level",
-              marks: 3,
-              topics: ["escapism", "time travel", "modern anxiety", "fantasy", "nostalgia"],
-              boardMoves: ["reality versus fantasy", "Charley's escape", "Sam's letter", "theme"],
-              hook: "The third level is less a platform and more a wish."
+              id: "eng-tiger-king", unit: "Supplementary Reader", title: "The Tiger King", marks: 4,
+              hook: "Power tries to defeat prophecy and walks straight into irony.",
+              topics: ["Satire on absolute power and arrogance", "Fate vs free will", "Conservation irony", "The prophecy and its fulfilment"],
+              boardMoves: ["satirical elements", "irony of ending", "king's obsession and its flaw", "message about wildlife conservation"],
+              pastYearQs: [
+                { year: 2024, marks: 4, q: "How is 'The Tiger King' a satire? What is ironic about the king's death?", a: "'The Tiger King' by Kalki is a biting satire on the arrogance, vanity, and foolishness of absolute power.\n\nSatirical elements:\n1. The king's absurd obsession: The Maharaja of Pratibandapuram receives a prophecy that he will be killed by a tiger. His entire life and reign become consumed by the single obsession of killing a hundred tigers to defeat the prophecy — to the exclusion of governance, justice, and common sense.\n2. Abuse of power: To kill tigers, the king declares martial law in forests, orders mass tiger hunts, and almost causes a diplomatic crisis with a British officer over tiger hunting rights. He prioritises his fear over his duties.\n3. Exploitation: He forces a reluctant landlord to give him his state of fifty villages in exchange for the tiger — a parody of how rulers extract wealth from subjects.\n\nIrony of his death:\nThe king believes he has defeated the prophecy after killing his 100th tiger (which he actually did not kill — an old hunter did). In celebration, his son is given a cheap wooden tiger toy. A splinter from the toy tiger enters the king's hand, leads to infection, spreads into blood poisoning, and kills him.\n\nThe ultimate irony: The Maharaja who dedicated his life to defeating the tiger's prophecy is killed — not by a real tiger but by a tiny toy tiger. His arrogance and obsession could not save him from fate." }
+              ]
             },
             {
-              id: "eng-tiger-king",
-              unit: "Supplementary Reader",
-              title: "The Tiger King",
-              marks: 3,
-              topics: ["satire", "power", "fate", "arrogance", "conservation irony"],
-              boardMoves: ["satirical elements", "prophecy", "king's obsession", "ending irony"],
-              hook: "Power tries to defeat prophecy and walks straight into irony."
-            },
-            {
-              id: "eng-journey-earth",
-              unit: "Supplementary Reader",
-              title: "Journey to the End of the Earth",
-              marks: 3,
-              topics: ["Antarctica", "climate change", "geological time", "environment", "human impact"],
-              boardMoves: ["environmental message", "Students on Ice", "geological history", "urgency"],
-              hook: "At the end of the Earth, the planet explains the beginning of our problem."
-            },
-            {
-              id: "eng-enemy",
-              unit: "Supplementary Reader",
-              title: "The Enemy",
-              marks: 3,
-              topics: ["war", "humanism", "medical ethics", "national duty", "moral courage"],
-              boardMoves: ["Sadao's dilemma", "humanity versus patriotism", "character analysis", "ethical choice"],
-              hook: "The enemy arrives wounded, and duty becomes complicated."
-            },
-            {
-              id: "eng-face-of-it",
-              unit: "Supplementary Reader",
-              title: "On the Face of It",
-              marks: 3,
-              topics: ["disability", "loneliness", "confidence", "friendship", "self-acceptance"],
-              boardMoves: ["Derry's change", "Mr Lamb's philosophy", "title meaning", "dialogue analysis"],
-              hook: "A garden becomes a place where a boy rehearses courage."
-            },
-            {
-              id: "eng-memories-childhood",
-              unit: "Supplementary Reader",
-              title: "Memories of Childhood",
-              marks: 3,
-              topics: ["discrimination", "identity", "resistance", "dignity", "social oppression"],
-              boardMoves: ["compare two autobiographical accounts", "oppression", "resistance", "title significance"],
-              hook: "Two childhood memories show how dignity learns to answer humiliation."
+              id: "eng-enemy", unit: "Supplementary Reader", title: "The Enemy", marks: 4,
+              hook: "The enemy arrives wounded — and duty becomes complicated.",
+              topics: ["Humanism vs nationalism", "Sadao's moral dilemma", "Medical ethics", "War and its dehumanisation", "Character of Hana"],
+              boardMoves: ["Sadao's dilemma", "how humanity prevails", "Hana's role", "what the title means"],
+              pastYearQs: [
+                { year: 2023, marks: 4, q: "Describe the moral dilemma Dr Sadao faces in 'The Enemy'. How does he resolve it?", a: "In Pearl S. Buck's story, Dr Sadao Hoki — a Japanese surgeon during World War II — faces a profound moral dilemma when an American prisoner of war, wounded and close to death, washes up on his beach.\n\nThe dilemma:\nAs a Japanese patriot, Sadao is duty-bound to hand the American over to the authorities, which would mean his execution. But as a doctor, his oath and humanity compel him to save a dying man's life regardless of nationality.\n\nThe resolution:\nSadao chooses humanity over nationalism — he operates on the American, saves his life, and hides him in his house. Later, he arranges for the prisoner to escape by giving him a boat, food, and instructions.\n\nThe tension throughout:\n- Sadao tries to rationalise: he tells himself he will hand the man over after he recovers. He even tells the General.\n- The General (who uses Sadao's medical services) promises to send assassins but forgets — his own needs override his patriotic duty.\n- The servants leave in moral protest — they cannot condone helping the enemy.\n\nThe story's message: True humanity transcends political boundaries. A doctor's first duty is to the preservation of life. In a world at war, individual acts of compassion carry profound moral weight." }
+              ]
             }
           ]
         },
         {
-          id: "english-skills",
-          title: "Reading and Creative Writing Skills",
-          publisher: "CBSE syllabus",
+          id: "english-skills", title: "Reading and Writing Skills", publisher: "CBSE",
           chapters: [
             {
-              id: "eng-reading",
-              unit: "Section A",
-              title: "Reading Comprehension",
-              marks: 22,
-              topics: ["unseen passage", "case-based factual passage", "inference", "analysis", "vocabulary in context"],
-              boardMoves: ["evidence selection", "main idea", "inference", "short answer precision"],
-              hook: "Reading questions reward proof, not vibes."
+              id: "eng-reading", unit: "Section A", title: "Reading Comprehension", marks: 22,
+              hook: "Reading questions reward proof, not vibes.",
+              topics: ["Unseen factual passage", "Case-based passage", "Inference and analysis", "Vocabulary in context", "Short answer precision"],
+              boardMoves: ["locate evidence in text", "identify main idea", "draw inference from clues", "answer within word limit"],
+              pastYearQs: [
+                { year: 2024, marks: 4, q: "What strategies should a student use to answer inference-based questions in unseen passage comprehension?", a: "Inference questions ask you to draw conclusions that are not directly stated in the text — you must read 'between the lines.'\n\nStrategies:\n1. Read the full passage first, then read the question: Understand the overall context before attempting inference. Knowing the author's purpose and tone helps you infer meaning correctly.\n2. Look for implied meaning in language: Pay attention to word choices, comparisons, and tone. If a writer calls a character 'efficient' in one sentence and shows them cutting corners in the next, the implied meaning is sarcasm or irony.\n3. Connect clues across the passage: Inference often requires combining information from different parts of the passage. A detail mentioned early may be needed to interpret something stated later.\n4. Answer must be grounded in the text: Even though the answer is inferred (not stated), it must be supported by evidence from the passage. Do not impose outside knowledge.\n5. Avoid over-inferring: Do not read in meanings that are too far removed from the text. The inference should be a logical and natural extension of what is written." }
+              ]
             },
             {
-              id: "eng-writing",
-              unit: "Section B",
-              title: "Creative Writing Skills",
-              marks: 18,
-              topics: ["notice", "invitation and reply", "letter to editor", "job application with bio-data", "article writing", "report writing"],
-              boardMoves: ["format", "tone", "organisation", "word limit", "accuracy"],
-              hook: "Writing marks are partly content and partly packaging; both must arrive together."
+              id: "eng-writing", unit: "Section B", title: "Creative Writing Skills", marks: 18,
+              hook: "Writing marks are partly content and partly packaging — both must arrive together.",
+              topics: ["Notice writing", "Invitation and reply", "Letter to editor", "Job application with bio-data", "Article writing", "Report writing"],
+              boardMoves: ["format accuracy is crucial", "word limit discipline", "formal vs informal tone", "content relevance"],
+              pastYearQs: [
+                { year: 2024, marks: 5, q: "Write an article (150-200 words) on 'The Impact of Social Media on Youth' for your school magazine.", a: "THE IMPACT OF SOCIAL MEDIA ON YOUTH\nBy [Your Name]\n\nSocial media has transformed the way young people communicate, learn, and see themselves — for better and for worse.\n\nOn the positive side, platforms like Instagram, YouTube, and Twitter have given young people unprecedented access to information, creative communities, and global conversations. Students connect with peers worldwide, explore diverse perspectives, and even build careers as content creators or entrepreneurs.\n\nHowever, the dark side is undeniable. Excessive social media use has been linked to rising rates of anxiety, depression, and loneliness among teenagers. The curated perfection of social media feeds distorts reality — young people compare their everyday lives with highlight reels, leading to poor self-esteem. Cyberbullying, misinformation, and screen addiction are real and growing concerns.\n\nThe solution lies not in abandonment but in balance. Schools should teach digital literacy — how to use social media critically and responsibly. Parents and teenagers must work together to set screen-time boundaries.\n\nSocial media is a tool. Like all tools, its impact depends entirely on how wisely we choose to use it.\n\n[Format tip: Title in bold/capitals, byline, paragraphed content, conclusion. No greeting/sign-off for articles.]" }
+              ]
             }
           ]
         }
@@ -1207,125 +491,62 @@ window.CBSE_STUDY_DATA = {
     },
     {
       id: "commercial-art",
-      name: "Applied Art - Commercial Art",
+      name: "Applied Art – Commercial Art",
       code: "052",
       icon: "CA",
+      color: "#ec4899",
+      colorSoft: "#fce7f3",
       theoryMarks: 30,
       practicalMarks: 70,
       durationMinutes: 120,
       officialUrl: "https://cbseacademic.nic.in/web_material/CurriculumMain27/SecPart2/Fine_Arts_SecP2_2026-27.pdf",
       samplePaperUrl: "https://cbseacademic.nic.in/web_material/SQP/ClassXII_2025_26/Applied_Arts_SQP.pdf",
-      pattern: {
-        basis: "CBSE 2026-27 Fine Arts curriculum and latest Applied Art sample paper.",
-        questionMarks: [1, 2, 6],
-        requestedMarksSupported: [1, 2, 3, 4, 5, 6],
-        sections: [
-          "Theory: 30 marks, 2 hours",
-          "Section A: 8 MCQs of 1 mark",
-          "Section B: 5 short answers of 2 marks",
-          "Section C: 3 long answers of 6 marks",
-          "Practical: illustration, poster, and portfolio assessment"
-        ],
-        competencies: [
-          { name: "Artwork identification", weight: 30 },
-          { name: "Style and school analysis", weight: 35 },
-          { name: "Applied composition and design judgement", weight: 35 }
-        ]
-      },
+      pattern: { basis: "CBSE 2026-27 Fine Arts curriculum.", questionMarks: [1, 2, 6], sections: ["Section A: 8 MCQs (1 mark)", "Section B: 5 short answers (2 marks)", "Section C: 3 long answers (6 marks)"] },
       books: [
         {
-          id: "commercial-art-theory",
-          title: "Applied Art Theory: History of Indian Art",
-          publisher: "CBSE Fine Arts syllabus",
+          id: "commercial-art-theory", title: "Applied Art Theory: History of Indian Art", publisher: "CBSE",
           chapters: [
             {
-              id: "art-miniature-schools",
-              unit: "Theory Unit 1",
-              title: "Miniature Painting Schools",
-              marks: 15,
-              topics: [
-                "Rajasthani School of Miniature Painting",
-                "Pahari School of Miniature Painting",
-                "Mughal School of Miniature Painting",
-                "Deccan Schools of Miniature Painting"
-              ],
-              boardMoves: ["school identification", "sub-school features", "style comparison", "artist and work matching"],
-              hook: "Miniature painting is small in size, not in detail."
+              id: "art-miniature-schools", unit: "Theory Unit 1", title: "Miniature Painting Schools", marks: 15,
+              hook: "Miniature painting is small in size, never in detail.",
+              topics: ["Rajasthani School — Mewar, Marwar, Bundi, Kota sub-schools", "Pahari School — Basohli and Kangra styles", "Mughal School — Akbar, Jahangir, Shah Jahan periods", "Deccan Schools"],
+              boardMoves: ["identify school from image features", "compare Mughal vs Rajasthani", "artist-work pairing", "style vocabulary"],
+              pastYearQs: [
+                { year: 2024, marks: 6, q: "Describe the main features of the Mughal School of Miniature Painting. How did it differ from the Rajasthani School?", a: "Mughal School of Miniature Painting:\nThe Mughal School developed under royal patronage beginning with Emperor Humayun, who brought Persian painters Mir Sayyid Ali and Abd us-Samad to India. It flourished under Akbar, Jahangir, and Shah Jahan.\n\nMain features:\n1. Realistic portraiture: Mughal painters were masters of realistic, individualistic portraiture — faces were carefully studied and rendered with depth.\n2. Persian-Indian fusion: It combined Persian techniques (flat perspective, intricate borders) with Indian themes (Hindu mythology, local flora and fauna).\n3. Use of natural pigments and gold: Rich mineral pigments and real gold leaf were used on hand-made paper.\n4. Court themes: Hunting scenes, battle scenes, portraits of emperors and nobles, and historical events were the main subjects.\n5. Seasonal changes under emperors: Under Akbar — dynamic, narrative, many artists collaborating; under Jahangir — more refined, interest in natural history, birds and plants; under Shah Jahan — more formal and decorative.\n\nDifference from Rajasthani School:\n- Rajasthani paintings are more vibrant, bold, and flat with intense primary colours (especially red and yellow).\n- Themes are predominantly religious — Krishna and Radha, Ramayana, Mahabharata — unlike the courtly secular themes of Mughal paintings.\n- Rajasthani figures are more stylised (large eyes, elongated forms) while Mughal figures are more naturalistic and individualistic.\n- Rajasthani art was patronised by local Rajput rulers and served devotional purposes; Mughal art served imperial glorification." },
+                { year: 2023, marks: 6, q: "Write a detailed note on the Kangra School of Pahari Painting. Name two famous artists of this school.", a: "The Kangra School is the finest and most celebrated style within the Pahari (Hill) School of miniature painting, which flourished in the hill kingdoms of the Himachal Pradesh and Jammu regions.\n\nDevelopment: The Kangra style emerged in the late 18th century, reaching its peak under the patronage of Raja Sansar Chand of Kangra (r. 1775-1823), who was an ardent art lover.\n\nMain features:\n1. Lyrical, romantic mood: Kangra paintings are characterised by a soft, lyrical quality — they depict love (especially Krishna-Radha themes) with tenderness and emotional depth.\n2. Delicate colours and fine lines: The palette is soft and luminous — pale greens, blues, and pinks. Lines are extremely fine, with great delicacy in depicting faces, especially women's faces with lotus-petal eyes.\n3. Natural settings: Lush natural backgrounds — forests, rivers, flowering trees, and monsoon skies — play an important role, reflecting the romantic mood of the subject.\n4. Themes: Primarily the Bhagavata Purana (Krishna's life), Gita Govinda (Jayadeva's poem about Radha-Krishna), Ragamala (musical modes depicted as scenes), and Nayaka-Nayika (hero-heroine) series.\n5. Soft feminine beauty: Kangra women are depicted with idealised grace — slender bodies, oval faces, and elaborate jewellery and costume.\n\nFamous artists: Nainsukh and his family were among the most celebrated. Purkhu of Kangra was another important master.\n\nComparison with Basohli (earlier Pahari style): Basohli paintings are bold and intense, with bright primary colours, thick lines, and a powerful expressiveness. Kangra is more delicate, refined, and romantic." }
+              ]
             },
             {
-              id: "art-modern-indian",
-              unit: "Theory Unit 2",
-              title: "National Flag, Bengal School, and Modern Trends",
-              marks: 15,
-              topics: [
-                "Indian National Flag",
-                "The Bengal School of Painting",
-                "Modern trends in Indian art paintings",
-                "Graphic prints",
-                "Sculptures"
-              ],
-              boardMoves: ["artwork identification", "artist-work pairing", "style features", "national symbolism"],
-              hook: "Modern Indian art turns heritage, politics, and experiment into visual language."
+              id: "art-modern-indian", unit: "Theory Unit 2", title: "Bengal School and Modern Trends", marks: 15,
+              hook: "Modern Indian art turns heritage, politics, and experiment into visual language.",
+              topics: ["Bengal School — Abanindranath Tagore, Nandalal Bose", "Indian National Flag — history and symbolism", "Modern trends — Amrita Sher-Gil, Progressive Artists' Group", "Graphic prints and sculptures"],
+              boardMoves: ["Bengal School features", "flag symbolism", "Amrita Sher-Gil's style", "Progressive Artists' Group artists"],
+              pastYearQs: [
+                { year: 2024, marks: 6, q: "Write a note on the Bengal School of Painting. What was its significance for Indian art?", a: "The Bengal School of Painting was an early 20th century art movement that sought to revive and reinvent Indian artistic traditions in response to the dominance of Western academic art during the colonial period.\n\nFounders and key figures:\n- Abanindranath Tagore (nephew of Rabindranath Tagore) is considered the founder. His mentor E.B. Havell, principal of the Calcutta School of Art, inspired the movement.\n- Important artists: Nandalal Bose, Asit Kumar Haldar, Surendranath Ganguly, Kshitindranath Majumdar.\n\nMain features:\n1. Return to Indian traditions: The Bengal School rejected Western oil painting and perspective, drawing inspiration from Mughal miniatures, Rajput paintings, Ajanta frescoes, and Pahari styles.\n2. Soft washes and lyrical technique: Artists used a watercolour wash technique inspired by East Asian (Japanese) art, creating soft, atmospheric, misty effects.\n3. Spiritual and mythological themes: Subjects were drawn from Indian mythology, history, and spirituality — Radha-Krishna, scenes from the Ramayana and Mahabharata, and portraits of Indian heroes.\n4. Swadeshi spirit: The school was deeply connected to the nationalist movement — art was used as a tool to assert Indian cultural identity against colonial rule. Nandalal Bose illustrated the Indian National Flag hoisted at the Lahore Congress session (1929).\n\nSignificance:\n1. It established that India had a rich and sophisticated artistic tradition worthy of respect and continuation.\n2. It produced an Indian art education tradition — the Kala Bhavana at Santiniketan (Visva-Bharati) became a centre of Indian art education.\n3. It inspired later generations of artists to explore Indian identity in art." }
+              ]
             }
           ]
         },
         {
-          id: "commercial-art-practical",
-          title: "Applied Art Practical",
-          publisher: "CBSE Fine Arts syllabus",
+          id: "commercial-art-practical", title: "Applied Art Practical", publisher: "CBSE",
           chapters: [
             {
-              id: "art-illustration",
-              unit: "Practical Part 1",
-              title: "Illustration",
-              marks: 25,
-              topics: [
-                "Illustration on a given subject",
-                "Specific situation",
-                "Drawing from life",
-                "Outdoor sketching",
-                "Media suitable for printing",
-                "Composition and drawing quality",
-                "Emphasis on subject",
-                "Overall impression"
-              ],
-              boardMoves: ["composition", "specific situation", "print suitability", "visual emphasis"],
-              hook: "Illustration is storytelling with no paragraph to hide behind."
+              id: "art-illustration", unit: "Practical 1", title: "Illustration", marks: 25,
+              hook: "Illustration is storytelling without paragraphs to hide behind.",
+              topics: ["Illustration on a given subject", "Specific situation drawing", "Composition and drawing quality", "Media suitable for printing", "Outdoor sketching"],
+              boardMoves: ["composition principles", "specific situation depiction", "line quality and proportion", "overall impression"],
+              pastYearQs: [
+                { year: 2023, marks: 6, q: "What are the key elements of a good illustration? How should a student approach an illustration question in the CBSE practical exam?", a: "A good illustration communicates a specific idea or story through visual means clearly and effectively.\n\nKey elements:\n1. Composition: The arrangement of all elements within the picture frame. A strong composition guides the viewer's eye through the illustration. Use the rule of thirds, create a focal point, and balance positive (objects) and negative (empty) space.\n2. Specific Situation: The illustration must clearly depict the stated subject or situation — not a generic scene. Every detail should serve the narrative.\n3. Line quality and draughtsmanship: Confident, varied lines show control and skill. Avoid scratchy, hesitant lines. Line weight variation (thick for outlines, thin for details) adds depth.\n4. Proportion and anatomy: Figures and objects must be in correct proportion. Distorted figures are acceptable in caricature but not in straightforward illustration.\n5. Overall impression: The illustration must have visual impact — clarity of idea, balance, and finish.\n\nApproach in exam:\n1. Read the subject carefully and plan your composition in pencil first — make a small thumbnail sketch.\n2. Build from the focal subject outward — establish the main figure/object before adding background details.\n3. Use media confidently — pencil, ink, or poster colour. Avoid overworking.\n4. Leave 10 minutes at the end to review and add finishing details." }
+              ]
             },
             {
-              id: "art-poster",
-              unit: "Practical Part 2",
-              title: "Poster Design",
-              marks: 25,
-              topics: [
-                "Specified data and slogan",
-                "Two or three colours",
-                "Balanced typography and illustration",
-                "Advertisement subjects",
-                "Tourism",
-                "Cultural activities",
-                "Community and nature development",
-                "Social, national, and international ideas",
-                "Commercial products"
-              ],
-              boardMoves: ["layout", "lettering", "colour scheme", "message clarity"],
-              hook: "A poster has seconds to win attention and minutes to be remembered."
-            },
-            {
-              id: "art-portfolio",
-              unit: "Practical Part 3",
-              title: "Portfolio Assessment",
-              marks: 20,
-              topics: [
-                "Record of yearly performance",
-                "Selected drawings in any media",
-                "Minimum four illustrations",
-                "Selected posters",
-                "Work based on Indian folk art",
-                "Work in personal style"
-              ],
-              boardMoves: ["portfolio completeness", "progress evidence", "variety", "personal style"],
-              hook: "A portfolio shows not just what you made, but how your eye improved."
+              id: "art-poster", unit: "Practical 2", title: "Poster Design", marks: 25,
+              hook: "A poster has seconds to win attention and minutes to be remembered.",
+              topics: ["Slogan and data integration", "Two or three colour scheme", "Balanced typography and illustration", "Social, commercial, and tourism subjects"],
+              boardMoves: ["visual hierarchy", "lettering style", "limited colour use", "message clarity and impact"],
+              pastYearQs: [
+                { year: 2024, marks: 6, q: "Describe the principles of effective poster design. What are the common mistakes students should avoid in poster design?", a: "Principles of effective poster design:\n\n1. Visual Hierarchy: The most important element (usually the main message or image) must be the largest and most prominent. The viewer's eye should move naturally from the most to least important elements.\n\n2. Limited colour palette: Use 2-3 colours maximum. High contrast between background and text ensures readability. Colour should reinforce the message — warm colours (red, orange) for urgency or excitement; cool colours (blue, green) for calm or environmental themes.\n\n3. Clear, readable typography: Lettering must be bold, clear, and legible from a distance. Avoid mixing too many font styles. The slogan should be short, powerful, and memorable.\n\n4. Strong central image: A poster must have one dominant visual element that immediately communicates the subject. The image and slogan must reinforce each other.\n\n5. Balanced composition: The text, image, and empty space must be in visual harmony. Neither overloaded with text nor too sparse.\n\nCommon mistakes to avoid:\n1. Too much text: A poster is not a notice — it must communicate instantly.\n2. Too many colours: More than 3 colours creates visual noise and confusion.\n3. Small, unreadable lettering: The slogan must be readable from a distance.\n4. Weak central image: A poster without a clear focal point fails to attract attention.\n5. Poor proportion: All elements must be sized appropriately — slogan dominant, supporting details smaller." }
+              ]
             }
           ]
         }
