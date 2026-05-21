@@ -11,6 +11,15 @@ const CLAUDE_MODEL   = "claude-haiku-4-5-20251001";
 const CLAUDE_ENDPOINT= "https://api.anthropic.com/v1/messages";
 const EXAM_DATE      = new Date("2027-02-15T06:00:00");   // approx board exam start
 
+/**
+ * CLOUDFLARE WORKER PROXY
+ * Set this to your Worker URL once you have deployed worker.js to Cloudflare.
+ * Example: "https://boardbridge-proxy.yourname.workers.dev"
+ * When set, no API key is needed in any browser — the Worker holds the key.
+ * Leave as "" to fall back to the manual localStorage API key.
+ */
+const WORKER_URL = "";
+
 const CLAUDE_SYSTEM = `You are a dedicated CBSE Class XII study assistant for a student in New Delhi preparing for board exams in Feb–Mar 2027.
 
 You ONLY help with these six subjects and their prescribed books:
@@ -45,7 +54,8 @@ const state = {
 
 /* ── Helpers ────────────────────────────────────────────── */
 function getApiKey()  { return localStorage.getItem("boardbridge_api_key") || ""; }
-function hasApiKey()  { return Boolean(getApiKey()); }
+function hasApiKey()  { return Boolean(WORKER_URL) || Boolean(getApiKey()); }
+function usingWorker(){ return Boolean(WORKER_URL); }
 
 function allChapters() {
   return DATA.subjects.flatMap(s => s.books.flatMap(b => b.chapters).map(c => ({...c, _subject: s})));
@@ -82,22 +92,46 @@ function nl2p(str) {
 }
 
 /* ── Claude API ─────────────────────────────────────────── */
+/**
+ * Call Claude via:
+ *   1. Cloudflare Worker (WORKER_URL set) — no browser key needed
+ *   2. Direct Anthropic API (localStorage key) — fallback / dev mode
+ */
 async function callClaude(userMessage, context = "") {
-  const key = getApiKey();
-  if (!key) throw new Error("NO_KEY");
   const messages = context
     ? [{ role: "user", content: `Context:\n${context}\n\nQuestion: ${userMessage}` }]
     : [{ role: "user", content: userMessage }];
 
+  const payload = { model: CLAUDE_MODEL, max_tokens: 1024, system: CLAUDE_SYSTEM, messages };
+
+  /* ── Route 1: Cloudflare Worker proxy (preferred) ── */
+  if (WORKER_URL) {
+    const res = await fetch(WORKER_URL, {
+      method : "POST",
+      headers: { "content-type": "application/json" },
+      body   : JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `Worker error ${res.status}`);
+    }
+    const data = await res.json();
+    return data.content?.[0]?.text || "(No response)";
+  }
+
+  /* ── Route 2: Direct browser → Anthropic (requires saved API key) ── */
+  const key = getApiKey();
+  if (!key) throw new Error("NO_KEY");
+
   const res = await fetch(CLAUDE_ENDPOINT, {
-    method: "POST",
+    method : "POST",
     headers: {
-      "content-type"                          : "application/json",
-      "x-api-key"                             : key,
-      "anthropic-version"                     : "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true"
+      "content-type"                             : "application/json",
+      "x-api-key"                                : key,
+      "anthropic-version"                        : "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",
     },
-    body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: 1024, system: CLAUDE_SYSTEM, messages })
+    body: JSON.stringify(payload),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -828,13 +862,25 @@ function initSettings() {
   function closeSettings() { overlay.setAttribute("hidden", ""); }
 
   function updateKeyStatus() {
-    const has = hasApiKey();
-    if (keyStatus) {
-      keyStatus.textContent = has ? "✔ API key saved — AI features active" : "No key saved. AI features unavailable.";
-      keyStatus.className   = "key-status " + (has ? "ok" : "");
-    }
     const sub = document.getElementById("ai-panel-sub");
-    if (sub) sub.textContent = has ? "CBSE Class XII · Claude-powered ✔" : "CBSE Class XII · Add API key to activate";
+    if (usingWorker()) {
+      if (keyStatus) {
+        keyStatus.innerHTML = `<span style="color:#10b981;font-size:.95rem">✔ Cloudflare proxy active — AI works on all devices automatically.</span>`;
+      }
+      /* Hide the key input fields when Worker is in use */
+      const fieldEl = document.querySelector(".dialog-body .field");
+      const btnRow  = document.querySelector(".dialog-body .btn-row");
+      if (fieldEl) fieldEl.style.display = "none";
+      if (btnRow)  btnRow.style.display  = "none";
+      if (sub) sub.textContent = "CBSE Class XII · Proxy-powered ✔";
+    } else {
+      const has = Boolean(getApiKey());
+      if (keyStatus) {
+        keyStatus.textContent = has ? "✔ API key saved — AI features active" : "No key saved. AI features unavailable.";
+        keyStatus.className   = "key-status " + (has ? "ok" : "");
+      }
+      if (sub) sub.textContent = has ? "CBSE Class XII · Claude-powered ✔" : "CBSE Class XII · Add API key to activate";
+    }
   }
 
   openBtn?.addEventListener("click", openSettings);
