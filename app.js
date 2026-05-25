@@ -405,26 +405,39 @@ Format your response clearly with headings and bullet points where appropriate.`
 function buildQuiz() {
   const ch = currentChapter();
   const pyqs = ch.pastYearQs || [];
-  state.quiz = shuffle(pyqs).map(q => ({ ...q, revealed: false }));
+  state.quiz = shuffle(pyqs).map(q => ({ ...q, revealed: false, _aiGen: false }));
 }
 
 function renderQuizTab() {
   const ch = currentChapter();
   if (!state.quiz.length && ch.pastYearQs?.length) buildQuiz();
   const items = state.quiz;
-  if (!items.length) return `<p class="empty-state">No quiz questions available for this chapter yet.</p>`;
-
   const s = currentSubject();
+
+  if (!items.length) return `
+    <div class="empty-state">
+      <p>No questions yet for this chapter.</p>
+      ${hasApiKey() ? `<button class="btn-explain-ai" id="quiz-ai-gen" style="--sc:${s.color};margin-top:14px">
+        ✦ Generate AI Questions
+      </button>` : ""}
+    </div>`;
+
   return `
   <div class="quiz-wrap">
     <div class="quiz-header">
-      <span class="quiz-count">${items.length} question${items.length>1?"s":""} · shuffled</span>
-      <button class="btn-ghost-sm" id="quiz-refresh">🔀 New Order</button>
+      <span class="quiz-count">${items.length} question${items.length>1?"s":""}${items[0]?._aiGen?" · AI-generated":" · past board papers"}</span>
+      <div class="quiz-btns">
+        <button class="btn-ghost-sm" id="quiz-refresh" title="Shuffle existing questions">🔀 Shuffle</button>
+        <button class="btn-ghost-sm quiz-ai-btn" id="quiz-ai-gen" title="${hasApiKey()?"Generate fresh questions via AI":"Add API key to generate AI questions"}" ${hasApiKey()?"":"disabled"}>
+          ✦ New AI Questions
+        </button>
+      </div>
     </div>
     ${items.map((item, i) => `
       <div class="q-card" id="qcard-${i}">
         <div class="q-meta">
-          <span class="q-year">${item.year || ""}</span>
+          ${item.year ? `<span class="q-year">${item.year}</span>` : ""}
+          ${item._aiGen ? `<span class="q-year" style="background:#ede9fe;color:#7c3aed">AI</span>` : ""}
           <span class="q-marks">${item.marks} mark${item.marks>1?"s":""}</span>
         </div>
         <div class="q-text">${escHtml(item.q)}</div>
@@ -441,20 +454,67 @@ function renderQuizTab() {
   </div>`;
 }
 
+async function generateAiQuizQuestions() {
+  const ch  = currentChapter();
+  const s   = currentSubject();
+  const btn = document.getElementById("quiz-ai-gen");
+  if (btn) { btn.disabled = true; btn.textContent = "⏳ Generating…"; }
+
+  const tc  = document.getElementById("tab-content");
+  if (tc) {
+    tc.insertAdjacentHTML("afterbegin",
+      `<div class="ai-loading" id="quiz-gen-indicator" style="padding:14px 0">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        &nbsp;Asking Claude to write fresh board-style questions…
+      </div>`);
+  }
+
+  try {
+    const marks = s.pattern?.questionMarks || [1, 3, 5];
+    const mixDesc = marks.map(m => `one ${m}-mark question`).join(", ");
+    const prompt =
+`Generate ${marks.length + 2} CBSE Class 12 board-exam-style questions for the chapter "${ch.title}" in ${s.name}.
+Include a variety: ${mixDesc}, plus one more of any type.
+These must be ORIGINAL — not the same as past papers. They should test conceptual understanding and application.
+
+Respond ONLY with a JSON array in this exact format (no markdown, no explanation):
+[
+  {"marks": 1, "q": "Question text", "a": "Complete model answer"},
+  {"marks": 3, "q": "Question text", "a": "Complete model answer"},
+  ...
+]`;
+
+    const response = await callClaude(prompt);
+    const jsonMatch = response.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error("Could not parse AI response as questions.");
+    const newQs = JSON.parse(jsonMatch[0]);
+    if (!Array.isArray(newQs) || !newQs.length) throw new Error("Empty question list.");
+    state.quiz = newQs.map(q => ({ ...q, revealed: false, _aiGen: true }));
+    renderPage();
+  } catch (e) {
+    document.getElementById("quiz-gen-indicator")?.remove();
+    if (btn) { btn.disabled = false; btn.textContent = "✦ New AI Questions"; }
+    const msg = e.message === "NO_KEY"
+      ? "Add your Anthropic API key in ⚙ Settings to generate AI questions."
+      : `Error: ${e.message}`;
+    alert(msg);
+  }
+}
+
 function attachQuizEvents() {
   document.getElementById("quiz-refresh")?.addEventListener("click", () => {
     buildQuiz();
     renderPage();
   });
+  document.getElementById("quiz-ai-gen")?.addEventListener("click", generateAiQuizQuestions);
 
   document.querySelectorAll(".btn-reveal").forEach(btn => {
     btn.addEventListener("click", () => {
       const i = parseInt(btn.dataset.idx);
       state.quiz[i].revealed = !state.quiz[i].revealed;
-      const card = document.getElementById(`qcard-${i}`);
-      const ans  = document.getElementById(`ans-${i}`);
-      if (!card || !ans) return;
-      state.quiz[i].revealed ? ans.classList.add("open") : ans.classList.remove("open");
+      const ans = document.getElementById(`ans-${i}`);
+      if (!ans) return;
+      ans.classList.toggle("open", state.quiz[i].revealed);
       btn.textContent = state.quiz[i].revealed ? "Hide Answer ↑" : "Show Answer ↓";
       btn.classList.toggle("active", state.quiz[i].revealed);
     });
@@ -464,8 +524,15 @@ function attachQuizEvents() {
 /* ================================================================
    TEST PAPER TAB
    ================================================================ */
+
+/* CBSE-approximate mark-weight fractions (sum doesn't need to be 1) */
+const CBSE_MARK_WEIGHT = { 1:0.20, 2:0.15, 3:0.25, 4:0.20, 5:0.25, 6:0.20 };
+
+/* Preset marks for each duration (CBSE standard) */
+const DURATION_MARKS = { 60: 30, 120: 60, 180: 80 };
+
 function renderTestTab() {
-  const s  = currentSubject();
+  const s        = currentSubject();
   const allChaps = s.books.flatMap(b => b.chapters);
   const validMarks = (s.pattern?.questionMarks || [1,2,3,5]);
 
@@ -476,17 +543,31 @@ function renderTestTab() {
 
       <div class="config-section">
         <label class="config-label">Duration</label>
-        <div class="radio-group">
-          ${[60,120,180].map(d => `
+        <div class="radio-group" id="duration-group">
+          ${Object.entries(DURATION_MARKS).map(([d, m]) => `
             <label class="radio-pill">
-              <input type="radio" name="duration" value="${d}" ${d===180?"checked":""}>
-              ${d===60?"1 hour":d===120?"2 hours":"3 hours"}
+              <input type="radio" name="duration" value="${d}" data-marks="${m}" ${d==="180"?"checked":""}>
+              ${d==="60"?"1 Hour":d==="120"?"2 Hours":"3 Hours"}
             </label>`).join("")}
         </div>
       </div>
 
       <div class="config-section">
-        <label class="config-label">Question Types</label>
+        <label class="config-label">Total Marks</label>
+        <div class="marks-preset-row">
+          <span class="marks-preset-note">Board standard for selected duration:</span>
+          <strong class="marks-preset-val" id="marks-preset-val">80 marks</strong>
+        </div>
+        <div class="custom-marks-row">
+          <label class="custom-marks-label">Override (leave blank to use standard):</label>
+          <input type="number" id="custom-marks" min="10" max="200"
+                 placeholder="e.g. 40" class="custom-marks-input">
+          <span class="custom-marks-hint">marks</span>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <label class="config-label">Question Types to Include</label>
         <div class="check-group">
           ${validMarks.map(m => `
             <label class="check-pill">
@@ -494,10 +575,15 @@ function renderTestTab() {
               ${m}-mark
             </label>`).join("")}
         </div>
+        <p class="config-hint">Questions will be distributed proportionally across selected types following CBSE pattern.</p>
       </div>
 
       <div class="config-section">
-        <label class="config-label">Chapters to include</label>
+        <label class="config-label">Chapters to Include</label>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <button class="btn-ghost-sm" id="select-all-chaps">Select all</button>
+          <button class="btn-ghost-sm" id="deselect-all-chaps">Deselect all</button>
+        </div>
         <div class="check-group chapter-checks">
           ${allChaps.map(ch => `
             <label class="check-pill ${ch.id === state.chapterId ? "current" : ""}">
@@ -513,15 +599,28 @@ function renderTestTab() {
     </div>`;
   }
 
-  /* paper already generated — render it */
   return renderPaperView();
 }
 
 function attachTestEvents() {
   if (!state.paper) {
-    document.getElementById("generate-paper")?.addEventListener("click", () => {
-      generatePaper();
+    /* Update "Board standard" display when duration radio changes */
+    document.querySelectorAll('input[name="duration"]').forEach(radio => {
+      radio.addEventListener("change", () => {
+        const presetEl = document.getElementById("marks-preset-val");
+        if (presetEl) presetEl.textContent = `${radio.dataset.marks} marks`;
+      });
     });
+
+    /* Select All / Deselect All chapters */
+    document.getElementById("select-all-chaps")?.addEventListener("click", () => {
+      document.querySelectorAll('input[name="chapters"]').forEach(cb => { cb.checked = true; });
+    });
+    document.getElementById("deselect-all-chaps")?.addEventListener("click", () => {
+      document.querySelectorAll('input[name="chapters"]').forEach(cb => { cb.checked = false; });
+    });
+
+    document.getElementById("generate-paper")?.addEventListener("click", generatePaper);
     return;
   }
   attachPaperEvents();
@@ -534,26 +633,85 @@ function generatePaper() {
   const markVals = [...document.querySelectorAll('input[name="marks"]:checked')].map(i => parseInt(i.value));
   const chapIds  = [...document.querySelectorAll('input[name="chapters"]:checked')].map(i => i.value);
 
+  /* Determine target marks — use custom override if valid, else CBSE standard */
+  const customVal  = parseInt(document.getElementById("custom-marks")?.value || "");
+  const targetMarks = (customVal >= 10 && customVal <= 200)
+    ? customVal
+    : (DURATION_MARKS[duration] || 80);
+
   const selectedChaps = allChaps.filter(c => chapIds.includes(c.id));
   if (!selectedChaps.length) { alert("Please select at least one chapter."); return; }
   if (!markVals.length)      { alert("Please select at least one question type."); return; }
 
-  const pool = selectedChaps.flatMap(ch =>
-    (ch.pastYearQs || []).filter(q => markVals.includes(q.marks)).map(q => ({...q, _chapter: ch.title}))
-  );
-  const shuffled = shuffle(pool);
+  /* ── Build shuffled question pools per mark type ── */
+  const pools = {};
+  markVals.forEach(m => {
+    pools[m] = shuffle(
+      selectedChaps.flatMap(ch =>
+        (ch.pastYearQs || []).filter(q => q.marks === m).map(q => ({...q, _chapter: ch.title}))
+      )
+    );
+  });
 
-  /* target total marks based on duration */
-  const targets = { 60: 30, 120: 55, 180: 80 };
-  const targetMarks = targets[duration] || 80;
-  const questions = [];
-  let total = 0;
-  for (const q of shuffled) {
-    if (total + q.marks <= targetMarks + 5) { questions.push(q); total += q.marks; }
-    if (total >= targetMarks) break;
+  /* ── Proportional allocation using CBSE_MARK_WEIGHT ── */
+  const totalWeight = markVals.reduce((sum, m) => sum + (CBSE_MARK_WEIGHT[m] || 0.20), 0);
+  const targetPerType = {};
+  markVals.forEach(m => {
+    const normWeight = (CBSE_MARK_WEIGHT[m] || 0.20) / totalWeight;
+    const raw        = (targetMarks * normWeight) / m;
+    targetPerType[m] = Math.max(1, Math.round(raw));
+  });
+
+  /* ── Cap at available pool size ── */
+  markVals.forEach(m => {
+    targetPerType[m] = Math.min(targetPerType[m], pools[m].length || 0);
+  });
+
+  /* ── Pick questions ── */
+  const picked = {};
+  markVals.forEach(m => { picked[m] = pools[m].slice(0, targetPerType[m]); });
+
+  let total = markVals.reduce((sum, m) => sum + picked[m].length * m, 0);
+
+  /* ── Fine-tune: add questions to approach target ── */
+  const byMarkDesc = [...markVals].sort((a, b) => b - a);
+  for (let iter = 0; iter < 30 && total < targetMarks - 1; iter++) {
+    let added = false;
+    for (const m of byMarkDesc) {
+      if (total + m <= targetMarks && picked[m].length < pools[m].length) {
+        picked[m].push(pools[m][picked[m].length]);
+        total += m;
+        added = true;
+        break;
+      }
+    }
+    if (!added) break;
   }
 
-  state.paper = { duration, markVals, chapIds, questions, total, subject: s.name };
+  /* ── Fine-tune: remove to not exceed target too much ── */
+  const byMarkAsc = [...markVals].sort((a, b) => a - b);
+  for (let iter = 0; iter < 30 && total > targetMarks + 1; iter++) {
+    let removed = false;
+    for (const m of byMarkAsc) {
+      if (picked[m].length > 1) {
+        picked[m].pop();
+        total -= m;
+        removed = true;
+        break;
+      }
+    }
+    if (!removed) break;
+  }
+
+  /* ── Flatten in ascending mark order ── */
+  const questions = [...markVals].sort((a, b) => a - b).flatMap(m => picked[m]);
+
+  if (!questions.length) {
+    alert("No questions found for the selected chapters and question types. Try selecting more chapters.");
+    return;
+  }
+
+  state.paper = { duration, targetMarks, markVals, chapIds, questions, total, subject: s.name };
   renderPage();
 }
 
